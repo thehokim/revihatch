@@ -7,100 +7,100 @@ import { useI18n } from "@/components/i18n-provider";
 export function Footer() {
   const { t } = useI18n() as any;
   return (
-    <footer className="relative overflow-hidden border-t border-border/40">
-      {/* Background image */}
+    <footer className="relative overflow-hidden bg-[#313131]">
+      {/* Background Grid Pattern - same as Hero */}
       <div className="absolute inset-0">
-        <Image
-          src="/minimalist-invisible-wall-hatch-aluminum.jpg"
-          alt="Невидимый настенный ревизионный люк"
-          fill
-          className="object-cover object-[center_80%]"
-          priority
-        />
-        <div className="absolute inset-0 bg-black/70" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#9ca3af15_1px,transparent_1px),linear-gradient(to_bottom,#9ca3af15_1px,transparent_1px)] bg-[size:20px_20px] rotate-[20deg] origin-center scale-230" />
+        <div className="absolute inset-y-0 left-0 w-full bg-gradient-to-r from-[#313131] via-transparent to-transparent" />
+          <div className="absolute inset-y-0 right-0 w-full bg-gradient-to-l from-[#313131] via-transparent to-transparent" />
       </div>
 
       <div className="relative z-10 container mx-auto px-4 py-12 text-white">
         <div className="grid gap-8 md:grid-cols-4">
+          {/* Logo and Description */}
           <div>
-            <div className="mb-4 flex items-center gap-2">
-              <div className="flex h-8 w-auto px-1 items-center justify-center bg-primary">
-                <span className="text-lg font-bold text-primary-foreground">
-                  REVI
-                </span>
-              </div>
-              <span className="text-xl font-bold tracking-tight">ZOR</span>
+            <div className="mb-4">
+              <Image
+                src="/FuterLogo.svg"
+                alt="Revizor"
+                width={120}
+                height={32}
+                className="h-8 w-auto"
+              />
             </div>
-            <p className="text-sm leading-relaxed text-white/80">{t("footer.tagline")}</p>
+            <p className="text-sm leading-relaxed text-white">{t("footer.tagline")}</p>
           </div>
 
+          {/* Products */}
           <div>
-            <h3 className="mb-4 font-semibold">{t("footer.products")}</h3>
-            <ul className="space-y-2 text-sm text-white/80">
+            <h3 className="mb-4 font-bold text-white">{t("footer.products")}</h3>
+            <ul className="space-y-2 text-sm text-white">
               <li>
                 <Link
                   href="/configurator?model=transformer"
-                  className="hover:text-white"
+                  className="hover:text-gray-300"
                 >
-                  Transformer
+                  Люк под покраску
                 </Link>
               </li>
               <li>
                 <Link
                   href="/configurator?model=universal"
-                  className="hover:text-white"
+                  className="hover:text-gray-300"
                 >
-                  Universal
+                  Напольный люк
                 </Link>
               </li>
               <li>
                 <Link
                   href="/configurator?model=floor"
-                  className="hover:text-white"
+                  className="hover:text-gray-300"
                 >
-                  Floor
+                  Люк «Универсал»
                 </Link>
               </li>
               <li>
                 <Link
                   href="/configurator?model=anodos"
-                  className="hover:text-white"
+                  className="hover:text-gray-300"
                 >
-                  Anodos
+                  Люк «Трансформер»
                 </Link>
               </li>
             </ul>
           </div>
 
+          {/* Company Info */}
           <div>
-            <h3 className="mb-4 font-semibold">{t("footer.company")}</h3>
-            <ul className="space-y-2 text-sm text-white/80">
+            <h3 className="mb-4 font-bold text-white">{t("footer.company")}</h3>
+            <ul className="space-y-2 text-sm text-white">
               <li>
-                <Link href="#about" className="hover:text-white">
+                <Link href="#about" className="hover:text-gray-300">
                   {t("footer.about")}
                 </Link>
               </li>
               <li>
-                <Link href="#reviews" className="hover:text-white">
+                <Link href="#reviews" className="hover:text-gray-300">
                   {t("nav.reviews")}
                 </Link>
               </li>
               <li>
-                <Link href="#faq" className="hover:text-white">
+                <Link href="#faq" className="hover:text-gray-300">
                   {t("nav.faq")}
                 </Link>
               </li>
               <li>
-                <Link href="/admin" className="hover:text-white">
+                <Link href="/admin" className="hover:text-gray-300">
                   Admin
                 </Link>
               </li>
             </ul>
           </div>
 
+          {/* Contacts */}
           <div>
-            <h3 className="mb-4 font-semibold">{t("footer.contacts")}</h3>
-            <ul className="space-y-2 text-sm text-white/80">
+            <h3 className="mb-4 font-bold text-white">{t("footer.contacts")}</h3>
+            <ul className="space-y-2 text-sm text-white">
               <li>+9989 906-81-80</li>
               <li>info@revizor.uz</li>
               <li>{t("footer.address")}</li>
@@ -108,7 +108,8 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 border-t border-white/20 pt-8 text-center text-sm text-white/70">
+        {/* Separator and Copyright */}
+        <div className="mt-12 border-t border-gray-400 pt-8 text-center text-sm text-white">
           <p>{t("footer.copyright")}</p>
         </div>
       </div>

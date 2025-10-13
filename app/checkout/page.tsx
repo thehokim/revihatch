@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { CheckCircle2 } from "lucide-react"
 import { AddressMap } from "@/components/address-map"
+import { PaymentPicker } from "@/components/payment-picker"
 
 interface OrderData {
   model: string
@@ -31,11 +32,12 @@ export default function CheckoutPage() {
   const [isSuccess, setIsSuccess] = useState(false)
 
   const [formData, setFormData] = useState({
-    name: "",
+    fio: "",
     phone: "",
     email: "",
-    address: "",
-    comment: "",
+    location: "",
+    comments: "",
+    paymentType: "cash",
   })
 
   useEffect(() => {
@@ -51,30 +53,64 @@ export default function CheckoutPage() {
     e.preventDefault()
     setIsSubmitting(true)
 
-    // Simulate order submission
-    await new Promise((resolve) => setTimeout(resolve, 1500))
+    try {
+      // Prepare order data for API
+      const orderPayload = {
+        fio: formData.fio,
+        phone: formData.phone,
+        email: formData.email || undefined,
+        paymentType: formData.paymentType,
+        location: formData.location,
+        comments: formData.comments || undefined,
+        productType: orderData?.modelName || "Unknown",
+        size: `${orderData?.width} × ${orderData?.height} ${t("cfg.units.cm")}`,
+        quantity: orderData?.quantity || 1,
+        totalPrice: orderData?.totalPrice || 0
+      }
 
-    // Store order in localStorage (mock database)
-    const orders = JSON.parse(localStorage.getItem("orders") || "[]")
-    const newOrder = {
-      id: Date.now().toString(),
-      ...orderData,
-      customer: formData,
-      status: "new",
-      createdAt: new Date().toISOString(),
+      // Send order to API
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(orderPayload)
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to create order')
+      }
+
+      // Store order in localStorage for admin panel
+      const orders = JSON.parse(localStorage.getItem("orders") || "[]")
+      const newOrder = {
+        id: result.orderId,
+        ...orderData,
+        customer: formData,
+        status: "new",
+        createdAt: new Date().toISOString(),
+      }
+      orders.push(newOrder)
+      localStorage.setItem("orders", JSON.stringify(orders))
+
+      setIsSubmitting(false)
+      setIsSuccess(true)
+
+      // Clear current order
+      localStorage.removeItem("currentOrder")
+
+    } catch (error) {
+      console.error('Error submitting order:', error)
+      setIsSubmitting(false)
+      // You could add error state here to show error message to user
+      alert('Ошибка при оформлении заказа. Попробуйте еще раз.')
     }
-    orders.push(newOrder)
-    localStorage.setItem("orders", JSON.stringify(orders))
-
-    setIsSubmitting(false)
-    setIsSuccess(true)
-
-    // Clear current order
-    localStorage.removeItem("currentOrder")
   }
 
   const handleAddressSelect = (address: string, lat: number, lng: number) => {
-    setFormData({ ...formData, address })
+    setFormData({ ...formData, location: address })
   }
 
   if (isSuccess) {
@@ -104,113 +140,175 @@ export default function CheckoutPage() {
   }
 
   return (
-    <main className="container mx-auto px-4 py-12">
-      <div className="mb-8">
-        <h1 className="mb-2 text-4xl font-bold tracking-tight">{t("checkout.title")}</h1>
-        <p className="text-lg text-muted-foreground">{t("checkout.subtitle")}</p>
-      </div>
+    <main className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-6 sm:py-8 lg:py-12">
+        {/* Header */}
+        <div className="mb-6 sm:mb-8">
+          <h1 className="mb-2 text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight">{t("checkout.title")}</h1>
+          <p className="text-sm sm:text-base lg:text-lg text-muted-foreground">{t("checkout.subtitle")}</p>
+        </div>
 
-      <div className="grid gap-8 lg:grid-cols-3">
+        {/* Mobile Order Summary - Show first on mobile */}
+        <div className="mb-4 lg:hidden">
+          <Card className="border-0 shadow-sm">
+            <CardHeader className="pb-2 px-3 pt-3">
+              <CardTitle className="text-base">{t("checkout.yourOrder")}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 px-3 pb-3">
+              <div className="grid grid-cols-2 gap-1 text-xs">
+                <div>
+                  <span className="text-muted-foreground text-xs">{t("checkout.model")}</span>
+                  <div className="font-medium text-xs">{t(orderData.modelName)}</div>
+                </div>
+                <div>
+                  <span className="text-muted-foreground text-xs">{t("checkout.size")}</span>
+                  <div className="font-medium text-xs">
+                    {orderData.width} × {orderData.height} {t("cfg.units.cm")}
+                  </div>
+                </div>
+                <div>
+                  <span className="text-muted-foreground text-xs">{t("checkout.cover")}</span>
+                  <div className="font-medium text-xs">{t(orderData.finish)}</div>
+                </div>
+                <div>
+                  <span className="text-muted-foreground text-xs">{t("checkout.count")}</span>
+                  <div className="font-medium text-xs">{orderData.quantity} {t("cfg.pcs")}</div>
+                </div>
+              </div>
+              <div className="border-t pt-2">
+                <div className="flex items-baseline justify-between">
+                  <span className="text-sm font-semibold">{t("cfg.summary.total")}</span>
+                  <span className="text-lg font-bold">{new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'UZS', maximumFractionDigits: 0 }).format(orderData.totalPrice)}</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">{t("checkout.notice")}</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid gap-4 lg:gap-8 lg:grid-cols-3">
           {/* Order Form */}
           <div className="lg:col-span-2">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>{t("checkout.contact")}</CardTitle>
-                  <CardDescription>{t("checkout.contactDesc")}</CardDescription>
+            <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-6">
+              {/* Contact Information */}
+              <Card className="border-0 shadow-sm">
+                <CardHeader className="pb-2 px-3 pt-3 sm:pb-4 sm:px-6 sm:pt-6">
+                  <CardTitle className="text-base sm:text-xl">{t("checkout.contact")}</CardTitle>
+                  <CardDescription className="text-xs sm:text-sm">{t("checkout.contactDesc")}</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                  <Label htmlFor="name">{t("checkout.name")} <span className="text-destructive">*</span></Label>
-                    <Input
-                      id="name"
-                      required
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      placeholder={t("checkout.placeholder.name")}
-                    />
-                  </div>
+                <CardContent className="space-y-3 px-3 pb-3 sm:space-y-4 sm:px-6 sm:pb-6">
+                  <div className="space-y-3 sm:grid sm:gap-4 sm:grid-cols-2">
+                    <div className="space-y-1 sm:col-span-2">
+                      <Label htmlFor="fio" className="text-xs sm:text-sm font-medium">{t("checkout.name")} <span className="text-destructive">*</span></Label>
+                      <Input
+                        id="fio"
+                        required
+                        value={formData.fio}
+                        onChange={(e) => setFormData({ ...formData, fio: e.target.value })}
+                        placeholder={t("checkout.placeholder.name")}
+                        className="h-9 sm:h-10 text-sm"
+                      />
+                    </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">{t("checkout.phone")} <span className="text-destructive">*</span></Label>
-                    <Input
-                      id="phone"
-                      type="tel"
-                      required
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      placeholder={t("checkout.placeholder.phone")}
-                    />
-                  </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="phone" className="text-xs sm:text-sm font-medium">{t("checkout.phone")} <span className="text-destructive">*</span></Label>
+                      <Input
+                        id="phone"
+                        type="tel"
+                        required
+                        value={formData.phone}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        placeholder={t("checkout.placeholder.phone")}
+                        className="h-9 sm:h-10 text-sm"
+                      />
+                    </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="email">{t("checkout.email")}</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      placeholder={t("checkout.placeholder.email")}
-                    />
+                    <div className="space-y-1">
+                      <Label htmlFor="email" className="text-xs sm:text-sm font-medium">{t("checkout.email")}</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        placeholder={t("checkout.placeholder.email")}
+                        className="h-9 sm:h-10 text-sm"
+                      />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>{t("checkout.address")}</CardTitle>
-                  <CardDescription>{t("checkout.addressDesc")}</CardDescription>
+              {/* Address Information */}
+              <Card className="border-0 shadow-sm">
+                <CardHeader className="pb-2 px-3 pt-3 sm:pb-4 sm:px-6 sm:pt-6">
+                  <CardTitle className="text-base sm:text-xl">{t("checkout.address")}</CardTitle>
+                  <CardDescription className="text-xs sm:text-sm">{t("checkout.addressDesc")}</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <AddressMap onAddressSelect={handleAddressSelect} initialAddress={formData.address} />
+                <CardContent className="space-y-3 px-3 pb-3 sm:space-y-4 sm:px-6 sm:pb-6">
+                  <AddressMap onAddressSelect={handleAddressSelect} initialAddress={formData.location} />
 
-                  <div className="space-y-2">
-                    <Label htmlFor="address">{t("checkout.fullAddress")} <span className="text-destructive">*</span></Label>
+                  <div className="space-y-1">
+                    <Label htmlFor="location" className="text-xs sm:text-sm font-medium">{t("checkout.fullAddress")} <span className="text-destructive">*</span></Label>
                     <Textarea
-                      id="address"
+                      id="location"
                       required
-                      value={formData.address}
-                      onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                      value={formData.location}
+                      onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                       placeholder={t("checkout.placeholder.fullAddress")}
-                      rows={3}
+                      rows={2}
+                      className="resize-none text-sm"
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="comment">{t("checkout.comment")}</Label>
+                  <div className="space-y-1">
+                    <Label htmlFor="comments" className="text-xs sm:text-sm font-medium">{t("checkout.comment")}</Label>
                     <Textarea
-                      id="comment"
-                      value={formData.comment}
-                      onChange={(e) => setFormData({ ...formData, comment: e.target.value })}
+                      id="comments"
+                      value={formData.comments}
+                      onChange={(e) => setFormData({ ...formData, comments: e.target.value })}
                       placeholder={t("checkout.placeholder.comment")}
-                      rows={3}
+                      rows={2}
+                      className="resize-none text-sm"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <Label htmlFor="paymentType" className="text-xs sm:text-sm font-medium">{t("checkout.paymentType")} <span className="text-destructive">*</span></Label>
+                    <PaymentPicker
+                      value={formData.paymentType}
+                      onChange={(value) => setFormData({ ...formData, paymentType: value })}
                     />
                   </div>
                 </CardContent>
               </Card>
 
-              <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
+              <Button 
+                type="submit" 
+                size="lg" 
+                className="w-full h-10 sm:h-12 bg-red-600 hover:bg-red-700 text-white font-medium text-sm sm:text-base" 
+                disabled={isSubmitting}
+              >
                 {isSubmitting ? t("checkout.submitting") : t("checkout.submit")}
               </Button>
             </form>
           </div>
 
-          {/* Order Summary */}
-          <div>
-            <Card className="sticky top-24">
-              <CardHeader>
-                <CardTitle>{t("checkout.yourOrder")}</CardTitle>
+          {/* Desktop Order Summary */}
+          <div className="hidden lg:block">
+            <Card className="sticky top-6">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-lg">{t("checkout.yourOrder")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">{t("checkout.model")}</span>
-                    <span className="font-medium">{orderData.modelName}</span>
+                    <span className="font-medium text-right">{t(orderData.modelName)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">{t("checkout.size")}</span>
                     <span className="font-medium">
-                      {orderData.width} × {orderData.height} мм
+                      {orderData.width} × {orderData.height} {t("cfg.units.cm")}
                     </span>
                   </div>
                   <div className="flex justify-between">
@@ -234,6 +332,7 @@ export default function CheckoutPage() {
             </Card>
           </div>
         </div>
+      </div>
     </main>
   )
 }

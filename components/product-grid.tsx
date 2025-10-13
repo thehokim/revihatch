@@ -12,78 +12,69 @@ const products = [
     name: "Transformer",
     description: "",
     features: [],
-    image: "/minimalist-invisible-wall-hatch-aluminum.jpg",
+    image: "/lyuk1.png",
   },
   {
     id: "universal",
     name: "Universal",
     description: "",
     features: [],
-    image: "/industrial-wall-access-panel-white.jpg",
+    image: "/lyuk2.png",
   },
   {
     id: "floor",
     name: "Floor",
     description: "",
     features: [],
-    image: "/floor-access-hatch-industrial-design.jpg",
+    image: "/lyuk3.png",
   },
   {
     id: "anodos",
     name: "Anodos",
     description: "",
     features: [],
-    image: "/premium-anodized-aluminum-hatch.jpg",
+    image: "/lyuk4.png",
   },
 ]
 
 export function ProductGrid() {
   const { t } = useI18n() as any
   return (
-    <section id="products" className="border-b border-border/40 bg-background py-24">
-      <div className="container mx-auto px-4">
-        <div className="mb-16 text-center">
-          <h2 className="mb-4 text-balance text-4xl font-bold tracking-tight md:text-5xl">{t("products.title")}</h2>
-          <p className="mx-auto max-w-2xl text-pretty text-lg leading-relaxed text-muted-foreground">{t("products.subtitle")}</p>
+    <section id="products" className="bg-white py-16">
+      <div className="container mx-auto">
+        <div className="mb-8 text-center">
+          <h2 className="mb-4 text-4xl font-bold text-black">{t("products.title")}</h2>
+          <p className="text-lg text-black">{t("products.subtitle")}</p>
         </div>
 
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-6 sm:gap-8 justify-items-center sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {products.map((product) => (
-            <Card key={product.id} className="group relative h-[500px] overflow-hidden transition-all hover:shadow-lg">
-              {/* Image - full card background */}
-              <div className="absolute inset-0">
+            <Card key={product.id} className="bg-white rounded-[10px] border border-[#DFDFDF] overflow-hidden w-full max-w-[474px] h-auto flex flex-col p-0">
+              {/* Image */}
+              <div className="aspect-[4/3] overflow-hidden">
                 <img
                   src={product.image || "/placeholder.svg"}
                   alt={product.name}
-                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  className="h-full w-full object-cover"
                 />
-                {/* Dark overlay for text readability */}
-                <div className="absolute inset-0 bg-black/40" />
               </div>
               
-              {/* Content overlay */}
-              <div className="relative z-10 flex h-full flex-col justify-between p-6">
-                <div>
-                  <CardTitle className="mb-2 text-xl text-white">{t(`products.${product.id}.name`)}</CardTitle>
-                  <CardDescription className="mb-4 text-sm leading-relaxed text-white/90">{t(`products.${product.id}.desc`)}</CardDescription>
-                  <ul className="space-y-2">
-                    {[0,1,2].map((i) => (
-                      <li key={i} className="flex items-center gap-2 text-sm text-white/80">
-                        <div className="h-1 w-1 rounded-full bg-white" />
-                        {t(`products.${product.id}.f${i+1}`)}
-                      </li>
-                    ))}
-                  </ul>
+              {/* Content */}
+              <CardContent className="p-0 flex flex-col flex-1 m-0 text-center">
+                <div className="flex-1 px-2">
+                  <CardTitle className="mb-1 text-lg font-bold text-black">{t(`products.${product.id}.name`)}</CardTitle>
+                  <CardDescription className="text-sm text-black leading-relaxed">{t(`products.${product.id}.desc`)}</CardDescription>
                 </div>
                 
                 {/* Button - always at bottom */}
-                <Button variant="ghost" className="group/btn w-full bg-white/10 text-white hover:bg-white/20" asChild>
-                  <Link href={`/configurator?model=${product.id}`}>
-                    {t("products.configure")}
-                    <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
-                  </Link>
-                </Button>
-              </div>
+                <div className="my-2 text-center">
+                  <Button variant="ghost" className="p-0 h-auto text-black hover:text-blue-700 hover:bg-transparent font-normal" asChild>
+                    <Link href={`/configurator?model=${product.id}`}>
+                      {t("products.configure")}
+                    </Link>
+                  </Button>
+                </div>
+              </CardContent>
             </Card>
           ))}
         </div>
