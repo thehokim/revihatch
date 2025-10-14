@@ -140,8 +140,8 @@ export function ProductConfigurator({ initialModel }: ProductConfiguratorProps) 
   }
   
   const [selectedSize, setSelectedSize] = useState(getInitialSize(initialModel))
-  const [customWidth, setCustomWidth] = useState(initialModel === 'anodos' ? 200 : initialModel === 'napolny' ? 500 : 300) // in mm
-  const [customHeight, setCustomHeight] = useState(initialModel === 'anodos' ? 200 : initialModel === 'napolny' ? 500 : 200) // in mm
+  const [customWidth, setCustomWidth] = useState(initialModel === 'anodos' ? 20 : initialModel === 'napolny' ? 50 : 30) // in cm
+  const [customHeight, setCustomHeight] = useState(initialModel === 'anodos' ? 20 : initialModel === 'napolny' ? 50 : 20) // in cm
   const [quantity, setQuantity] = useState(1)
   const [useCustomSize, setUseCustomSize] = useState(false)
   const [usePerimeterPricing, setUsePerimeterPricing] = useState(false)
@@ -189,20 +189,20 @@ export function ProductConfigurator({ initialModel }: ProductConfiguratorProps) 
     setIsTripleDoor(false)
     // Update custom dimensions based on model
     if (newModel === 'anodos') {
-      setCustomWidth(200)
-      setCustomHeight(200)
+      setCustomWidth(20)
+      setCustomHeight(20)
     } else if (newModel === 'napolny') {
-      setCustomWidth(500)
-      setCustomHeight(500)
+      setCustomWidth(50)
+      setCustomHeight(50)
     } else if (newModel === 'floor') {
-      setCustomWidth(300)
-      setCustomHeight(200)
+      setCustomWidth(30)
+      setCustomHeight(20)
     } else if (newModel === 'universal') {
-      setCustomWidth(300)
-      setCustomHeight(200)
+      setCustomWidth(30)
+      setCustomHeight(20)
     } else {
-      setCustomWidth(300)
-      setCustomHeight(200)
+      setCustomWidth(30)
+      setCustomHeight(20)
     }
     
     // Update URL to reflect the new model
@@ -228,7 +228,7 @@ export function ProductConfigurator({ initialModel }: ProductConfiguratorProps) 
       }
     } else if (useCustomSize) {
       // Calculate custom price based on perimeter
-      const perimeter = (customWidth + customHeight) * 2 / 10 // convert mm to cm
+      const perimeter = (customWidth + customHeight) * 2 // already in cm
       
       // Find appropriate perimeter pricing
       const perimeterData = currentPerimeterPricing.find(p => perimeter <= p.maxPerimeter)
@@ -252,6 +252,11 @@ export function ProductConfigurator({ initialModel }: ProductConfiguratorProps) 
       }
     } else if (selectedSizeData) {
       priceUSD = selectedSizeData.priceUSD
+      
+      // Apply ceiling installation surcharge for anodos (for ready sizes)
+      if (selectedModel === 'anodos' && isCeilingInstallation) {
+        priceUSD = priceUSD + 3 // $3 surcharge for ceiling installation
+      }
     }
     
     // Convert to UZS (assuming 1 USD = 12500 UZS)
@@ -262,7 +267,7 @@ export function ProductConfigurator({ initialModel }: ProductConfiguratorProps) 
   // Calculate current dimensions based on selected option
   const currentWidth = useMemo(() => {
     if (useCustomSize) {
-      return customWidth / 10 // convert mm to cm
+      return customWidth // already in cm
     } else if (usePerimeterPricing && selectedPerimeterData) {
       return selectedPerimeterData.exampleWidth
     } else if (selectedSizeData) {
@@ -273,7 +278,7 @@ export function ProductConfigurator({ initialModel }: ProductConfiguratorProps) 
 
   const currentHeight = useMemo(() => {
     if (useCustomSize) {
-      return customHeight / 10 // convert mm to cm
+      return customHeight // already in cm
     } else if (usePerimeterPricing && selectedPerimeterData) {
       return selectedPerimeterData.exampleHeight
     } else if (selectedSizeData) {
@@ -412,6 +417,39 @@ export function ProductConfigurator({ initialModel }: ProductConfiguratorProps) 
           </div>
         </div>
 
+        {/* Installation Type Option - for Anodos - Always show */}
+        {selectedModel === 'anodos' && (
+          <div>
+            <h3 className="text-lg font-bold text-black mb-4">{t("cfg.installationType")}</h3>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <button
+                onClick={() => setIsCeilingInstallation(false)}
+                className={`p-3 border-2 rounded-lg text-center transition-colors flex-1 ${
+                  !isCeilingInstallation
+                    ? 'bg-white border-gray-600'
+                    : 'bg-white border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                <div className="font-medium text-black">{t("cfg.wallMount")}</div>
+                <div className="text-sm text-gray-600">{t("cfg.basePrice")}</div>
+              </button>
+              <button
+                onClick={() => setIsCeilingInstallation(true)}
+                className={`p-3 border-2 rounded-lg text-center transition-colors flex-1 ${
+                  isCeilingInstallation
+                    ? 'bg-white border-gray-600'
+                    : 'bg-white border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                <div className="font-medium text-black">{t("cfg.ceilingMount")}</div>
+                <div className="text-sm text-gray-600">
+                  (+3 $)
+                </div>
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Ready Sizes */}
         <div>
           <h3 className="text-lg font-bold text-black mb-4">{t("cfg.readySizes")}</h3>
@@ -423,6 +461,9 @@ export function ProductConfigurator({ initialModel }: ProductConfiguratorProps) 
                   setSelectedSize(size.id)
                   setUseCustomSize(false)
                   setUsePerimeterPricing(false)
+                  // Update custom size fields to match selected size
+                  setCustomWidth(size.width)
+                  setCustomHeight(size.height)
                   // Auto-determine door type based on size
                   const sizePerimeter = (size.width + size.height) * 2
                   if (sizePerimeter > 200) {
@@ -455,6 +496,9 @@ export function ProductConfigurator({ initialModel }: ProductConfiguratorProps) 
                   setSelectedPerimeter(pricing.maxPerimeter.toString())
                   setUsePerimeterPricing(true)
                   setUseCustomSize(false)
+                  // Update custom size fields to match example dimensions
+                  setCustomWidth(pricing.exampleWidth)
+                  setCustomHeight(pricing.exampleHeight)
                   // Set door type based on model
                   if (selectedModel === 'transformer') {
                     setIsDoubleDoor('isDoubleDoor' in pricing ? pricing.isDoubleDoor || false : false)
@@ -534,39 +578,6 @@ export function ProductConfigurator({ initialModel }: ProductConfiguratorProps) 
           </div>
         )}
 
-        {/* Installation Type Option - for Anodos */}
-        {selectedPerimeterData?.hasInstallationTypeOption && selectedModel === 'anodos' && (
-          <div>
-            <h3 className="text-lg font-bold text-black mb-4">{t("cfg.installationType")}</h3>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <button
-                onClick={() => setIsCeilingInstallation(false)}
-                className={`p-3 border-2 rounded-lg text-center transition-colors flex-1 ${
-                  !isCeilingInstallation
-                    ? 'bg-white border-gray-600'
-                    : 'bg-white border-gray-300 hover:bg-gray-50'
-                }`}
-              >
-                <div className="font-medium text-black">{t("cfg.wallMount")}</div>
-                <div className="text-sm text-gray-600">{t("cfg.basePrice")}</div>
-              </button>
-              <button
-                onClick={() => setIsCeilingInstallation(true)}
-                className={`p-3 border-2 rounded-lg text-center transition-colors flex-1 ${
-                  isCeilingInstallation
-                    ? 'bg-white border-gray-600'
-                    : 'bg-white border-gray-300 hover:bg-gray-50'
-                }`}
-              >
-                <div className="font-medium text-black">{t("cfg.ceilingMount")}</div>
-                <div className="text-sm text-gray-600">
-                  (+{'ceilingSurcharge' in selectedPerimeterData && selectedPerimeterData.ceilingSurcharge ? selectedPerimeterData.ceilingSurcharge : 0} $)
-                </div>
-              </button>
-            </div>
-          </div>
-        )}
-
         {/* Custom Size */}
         <div>
           <h3 className="text-lg font-bold text-black mb-4">{t("cfg.customSize")}</h3>
@@ -577,23 +588,31 @@ export function ProductConfigurator({ initialModel }: ProductConfiguratorProps) 
                 <Input
                   id="custom-width"
                   type="number"
+                  min="20"
+                  max={selectedModel === 'anodos' ? 110 : selectedModel === 'transformer' ? 90 : selectedModel === 'napolny' ? 200 : 90}
                   value={customWidth}
                   onChange={(e) => {
                     const newWidth = Number(e.target.value)
-                    setCustomWidth(newWidth)
-                    setUseCustomSize(true)
-                    setUsePerimeterPricing(false)
-                    // Auto-determine door type based on perimeter
-                    const newPerimeter = (newWidth + customHeight) * 2 / 10
-                    if (newPerimeter > 200) {
-                      setIsDoubleDoor(true)
-                    } else {
-                      setIsDoubleDoor(false)
+                    const newPerimeter = (newWidth + customHeight) * 2
+                    
+                    // Check perimeter limits based on model
+                    const maxPerimeter = selectedModel === 'anodos' ? 440 : selectedModel === 'transformer' ? 360 : selectedModel === 'napolny' ? 800 : 360
+                    
+                    if (newPerimeter <= maxPerimeter) {
+                      setCustomWidth(newWidth)
+                      setUseCustomSize(true)
+                      setUsePerimeterPricing(false)
+                      // Auto-determine door type based on perimeter
+                      if (newPerimeter > 200) {
+                        setIsDoubleDoor(true)
+                      } else {
+                        setIsDoubleDoor(false)
+                      }
                     }
                   }}
                   className="pr-8 border-gray-300"
                 />
-                <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs text-gray-500">{t("cfg.units.mm")}</div>
+                <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs text-gray-500">{t("cfg.units.cm")}</div>
               </div>
             </div>
             <div>
@@ -602,30 +621,38 @@ export function ProductConfigurator({ initialModel }: ProductConfiguratorProps) 
                 <Input
                   id="custom-height"
                   type="number"
+                  min="20"
+                  max={selectedModel === 'anodos' ? 110 : selectedModel === 'transformer' ? 90 : selectedModel === 'napolny' ? 200 : 90}
                   value={customHeight}
                   onChange={(e) => {
                     const newHeight = Number(e.target.value)
-                    setCustomHeight(newHeight)
-                    setUseCustomSize(true)
-                    setUsePerimeterPricing(false)
-                    // Auto-determine door type based on perimeter
-                    const newPerimeter = (customWidth + newHeight) * 2 / 10
-                    if (newPerimeter > 200) {
-                      setIsDoubleDoor(true)
-                    } else {
-                      setIsDoubleDoor(false)
+                    const newPerimeter = (customWidth + newHeight) * 2
+                    
+                    // Check perimeter limits based on model
+                    const maxPerimeter = selectedModel === 'anodos' ? 440 : selectedModel === 'transformer' ? 360 : selectedModel === 'napolny' ? 800 : 360
+                    
+                    if (newPerimeter <= maxPerimeter) {
+                      setCustomHeight(newHeight)
+                      setUseCustomSize(true)
+                      setUsePerimeterPricing(false)
+                      // Auto-determine door type based on perimeter
+                      if (newPerimeter > 200) {
+                        setIsDoubleDoor(true)
+                      } else {
+                        setIsDoubleDoor(false)
+                      }
                     }
                   }}
                   className="pr-8 border-gray-300"
                 />
-                <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs text-gray-500">{t("cfg.units.mm")}</div>
+                <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs text-gray-500">{t("cfg.units.cm")}</div>
               </div>
             </div>
           </div>
           {useCustomSize && (
             <div className="mt-4 p-3 bg-gray-50 rounded-lg">
               <div className="text-sm text-gray-600">
-                {t("cfg.perimeter")}: {((customWidth + customHeight) * 2 / 10).toFixed(1)} {t("cfg.units.cm")}
+                {t("cfg.perimeter")}: {((customWidth + customHeight) * 2).toFixed(1)} {t("cfg.units.cm")}
               </div>
               <div className="text-sm text-gray-600 mt-1">
                 {t("cfg.doorType")}: {isTripleDoor ? t("cfg.doorTypes.tripleEven") : isDoubleDoor ? t("cfg.doorTypes.doubleCenter") : t("cfg.doorTypes.singleRight")}
@@ -633,6 +660,18 @@ export function ProductConfigurator({ initialModel }: ProductConfiguratorProps) 
               <div className="text-sm text-gray-600 mt-1">
                 {t("cfg.priceCalculation")}
               </div>
+              {(() => {
+                const currentPerimeter = (customWidth + customHeight) * 2
+                const maxPerimeter = selectedModel === 'anodos' ? 440 : selectedModel === 'transformer' ? 360 : selectedModel === 'napolny' ? 800 : 360
+                if (currentPerimeter > maxPerimeter) {
+                  return (
+                    <div className="text-sm text-red-600 mt-2 font-medium">
+                      ⚠️ {t("cfg.perimeter")} превышает максимальный ({maxPerimeter} {t("cfg.units.cm")})
+                    </div>
+                  )
+                }
+                return null
+              })()}
             </div>
           )}
         </div>

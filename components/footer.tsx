@@ -15,11 +15,11 @@ export function Footer() {
           <div className="absolute inset-y-0 right-0 w-full bg-gradient-to-l from-[#313131] via-transparent to-transparent" />
       </div>
 
-      <div className="relative z-10 container mx-auto px-4 py-12 text-white">
-        <div className="grid gap-8 md:grid-cols-4">
+      <div className="relative z-10 container mx-auto px-4 py-8 md:py-12 text-white">
+        <div className="grid gap-4 md:gap-8 grid-cols-2 md:grid-cols-4">
           {/* Logo and Description */}
           <div>
-            <div className="mb-4">
+            <div className="mb-2 md:mb-4">
               <Image
                 src="/FuterLogo.svg"
                 alt="Revizor"
@@ -33,8 +33,8 @@ export function Footer() {
 
           {/* Products */}
           <div>
-            <h3 className="mb-4 font-bold text-white">{t("footer.products")}</h3>
-            <ul className="space-y-2 text-sm text-white">
+            <h3 className="mb-2 md:mb-4 font-bold text-white">{t("footer.products")}</h3>
+            <ul className="space-y-1 md:space-y-2 text-sm text-white">
               <li>
                 <Link
                   href="/configurator?model=transformer"
@@ -72,8 +72,8 @@ export function Footer() {
 
           {/* Company Info */}
           <div>
-            <h3 className="mb-4 font-bold text-white">{t("footer.company")}</h3>
-            <ul className="space-y-2 text-sm text-white">
+            <h3 className="mb-2 md:mb-4 font-bold text-white">{t("about.hero.aboutBtn")}</h3>
+            <ul className="space-y-1 md:space-y-2 text-sm text-white">
               <li>
                 <Link href="#about" className="hover:text-gray-300">
                   {t("footer.about")}
@@ -99,8 +99,8 @@ export function Footer() {
 
           {/* Contacts */}
           <div>
-            <h3 className="mb-4 font-bold text-white">{t("footer.contacts")}</h3>
-            <ul className="space-y-2 text-sm text-white">
+            <h3 className="mb-2 md:mb-4 font-bold text-white">{t("footer.contacts")}</h3>
+            <ul className="space-y-1 md:space-y-2 text-sm text-white">
               <li>+9989 906-81-80</li>
               <li>info@revizor.uz</li>
               <li>{t("footer.address")}</li>
@@ -109,7 +109,7 @@ export function Footer() {
         </div>
 
         {/* Separator and Copyright */}
-        <div className="mt-12 border-t border-gray-400 pt-8 text-center text-sm text-white">
+        <div className="mt-6 md:mt-12 border-t border-gray-400 pt-4 md:pt-8 text-center text-sm text-white">
           <p>{t("footer.copyright")}</p>
         </div>
       </div>

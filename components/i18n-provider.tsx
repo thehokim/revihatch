@@ -52,13 +52,13 @@ const ru: Messages = {
   "products.universal.f1": "",
   "products.universal.f2": "",
   "products.universal.f3": "",
-  "products.floor.name": "Люк «Универсал»",
-  "products.floor.desc": "прочный корпус, влагостойкий ГВЛ, точная регулировка и выдвижное открывание на двух защёлках.",
+  "products.floor.name": "Люк настенный под плитку",
+  "products.floor.desc": "эстетичное решение для скрытого доступа к инженерным коммуникациям.",
   "products.floor.f1": "",
   "products.floor.f2": "",
   "products.floor.f3": "",
-  "products.anodos.name": "Люк «Трансформер»",
-  "products.anodos.desc": "открывание в любую сторону, плавный ход газлифтов, стальной корпус с полимерным покрытием.",
+  "products.anodos.name": "Люк настенный «Универсал»",
+  "products.anodos.desc": "премиальное решение для удобного и эстетичного доступа к инженерным коммуникациям.",
   "products.anodos.f1": "",
   "products.anodos.f2": "",
   "products.anodos.f3": "",
@@ -307,6 +307,8 @@ const ru: Messages = {
   "map.mapInstruction": "Откройте карту, найдите нужное место и скопируйте координаты",
   "map.latitude": "Широта",
   "map.longitude": "Долгота",
+  "map.showMap": "Показать карту",
+  "map.loading": "Загрузка карты...",
 }
 
 const uz: Messages = {
@@ -355,13 +357,13 @@ const uz: Messages = {
   "products.universal.f1": "",
   "products.universal.f2": "",
   "products.universal.f3": "",
-  "products.floor.name": "Lyuk «Universal»",
-  "products.floor.desc": "mustahkam korpus, namlikka chidamli GVL, aniq sozlash va ikki qisqichda tortib ochilish.",
+  "products.floor.name": "Devor lyuki plitka ostida",
+  "products.floor.desc": "muhandislik kommunikatsiyalariga yashirin kirish uchun estetik yechim.",
   "products.floor.f1": "",
   "products.floor.f2": "",
   "products.floor.f3": "",
-  "products.anodos.name": "Lyuk «Transformator»",
-  "products.anodos.desc": "har qanday tomonga ochilish, gazliftlarning silliq harakati, polimer qoplama bilan po'lat korpus.",
+  "products.anodos.name": "Devor lyuki «Universal»",
+  "products.anodos.desc": "muhandislik kommunikatsiyalariga qulay va estetik kirish uchun premium yechim.",
   "products.anodos.f1": "",
   "products.anodos.f2": "",
   "products.anodos.f3": "",
@@ -611,6 +613,8 @@ const uz: Messages = {
   "map.mapInstruction": "Xaritani oching, kerakli joyni toping va koordinatalarni nusxalang",
   "map.latitude": "Kenglik",
   "map.longitude": "Uzunlik",
+  "map.showMap": "Xaritani ko'rsatish",
+  "map.loading": "Xarita yuklanmoqda...",
 }
 
 const dictionaries: Record<Lang, Messages> = { ru, uz }

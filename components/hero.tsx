@@ -11,6 +11,18 @@ export function Hero() {
   const { t } = useI18n() as any
   const [hoveredHatch, setHoveredHatch] = useState<number | null>(null)
   const [isTransitioning, setIsTransitioning] = useState(false)
+  const [clickedHatch, setClickedHatch] = useState<number | null>(null)
+  
+  // Handle mobile click
+  const handleMobileClick = (hatchId: number) => {
+    if (clickedHatch === hatchId) {
+      setClickedHatch(null)
+      setHoveredHatch(null)
+    } else {
+      setClickedHatch(hatchId)
+      setHoveredHatch(hatchId)
+    }
+  }
   
   const hatches = [
     {
@@ -95,7 +107,7 @@ export function Hero() {
                 priority
               />
               
-              {/* Overlay Image (appears on hover) */}
+              {/* Overlay Image (appears on hover or click) */}
               {hoveredHatch && (
                 <Image
                   src={hatches.find(h => h.id === hoveredHatch)?.image || "/Herolyuk.png"}
@@ -129,15 +141,18 @@ export function Hero() {
                       }, 50)
                     }
                   }}
+                  onClick={() => handleMobileClick(hatch.id)}
                 >
                   {/* Plus Icon */}
                   <div className="relative group cursor-pointer">
-                    <div className="w-8 h-8 bg-white/10 border border-white/50 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-300">
+                    <div className={`w-8 h-8 bg-white/10 border border-white/50 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-300 ${
+                      clickedHatch === hatch.id ? 'bg-white/20 border-white/70' : ''
+                    }`}>
                       <Plus className="w-4 h-4 text-white" />
                     </div>
                     
-                    {/* Hatch Name Label */}
-                    <div className={`absolute right-10 top-1/2 -translate-y-1/2 bg-white/10 border border-white/50 text-white px-3 py-1 rounded-lg text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none ${
+                    {/* Hatch Name Label - Hidden on mobile */}
+                    <div className={`absolute right-10 top-1/2 -translate-y-1/2 bg-white/10 border border-white/50 text-white px-3 py-1 rounded-lg text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none hidden md:block ${
                       hoveredHatch === hatch.id ? 'opacity-100' : ''
                     }`}>
                       {hatch.name}

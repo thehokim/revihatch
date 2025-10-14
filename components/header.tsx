@@ -60,7 +60,7 @@ export function Header() {
           {/* Language switch */}
           <Button variant="ghost" size="sm" className="border border-gray-100/50 bg-white/25 rounded-lg text-foreground hover:bg-transparent" onClick={() => setLang(lang === "ru" ? "uz" : "ru")}>{lang === "ru" ? "RU" : "UZ"}</Button>
           
-          <Button onClick={() => router.push("/checkout")}>
+          <Button onClick={() => router.push("/configurator")}>
             {t("action.order")}
           </Button>
         </div>
@@ -114,7 +114,7 @@ export function Header() {
                   <Button
                     className="w-full"
                     onClick={() => {
-                      router.push("/checkout")
+                      router.push("/configurator")
                       setIsMobileMenuOpen(false)
                     }}
                   >

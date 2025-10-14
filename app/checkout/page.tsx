@@ -140,144 +140,148 @@ export default function CheckoutPage() {
   }
 
   return (
-    <main className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-6 sm:py-8 lg:py-12">
+    <main className="min-h-screen bg-background pt-4 sm:pt-8">
+      <div className="container mx-auto px-2 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12 max-w-6xl">
         {/* Header */}
-        <div className="mb-6 sm:mb-8">
+        <div className="mb-6 sm:mb-8 lg:mb-10">
           <h1 className="mb-2 text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight">{t("checkout.title")}</h1>
-          <p className="text-sm sm:text-base lg:text-lg text-muted-foreground">{t("checkout.subtitle")}</p>
+          <p className="text-sm sm:text-base text-muted-foreground">{t("checkout.subtitle")}</p>
         </div>
 
         {/* Mobile Order Summary - Show first on mobile */}
-        <div className="mb-4 lg:hidden">
-          <Card className="border-0 shadow-sm">
-            <CardHeader className="pb-2 px-3 pt-3">
-              <CardTitle className="text-base">{t("checkout.yourOrder")}</CardTitle>
+        <div className="mb-6 lg:hidden max-w-sm mx-auto">
+          <Card className="">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm">{t("checkout.yourOrder")}</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2 px-3 pb-3">
-              <div className="grid grid-cols-2 gap-1 text-xs">
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-2 gap-3 text-xs">
                 <div>
-                  <span className="text-muted-foreground text-xs">{t("checkout.model")}</span>
+                  <span className="text-muted-foreground text-xs block mb-1">{t("checkout.model")}</span>
                   <div className="font-medium text-xs">{t(orderData.modelName)}</div>
                 </div>
                 <div>
-                  <span className="text-muted-foreground text-xs">{t("checkout.size")}</span>
+                  <span className="text-muted-foreground text-xs block mb-1">{t("checkout.size")}</span>
                   <div className="font-medium text-xs">
                     {orderData.width} × {orderData.height} {t("cfg.units.cm")}
                   </div>
                 </div>
                 <div>
-                  <span className="text-muted-foreground text-xs">{t("checkout.cover")}</span>
+                  <span className="text-muted-foreground text-xs block mb-1">{t("checkout.cover")}</span>
                   <div className="font-medium text-xs">{t(orderData.finish)}</div>
                 </div>
                 <div>
-                  <span className="text-muted-foreground text-xs">{t("checkout.count")}</span>
+                  <span className="text-muted-foreground text-xs block mb-1">{t("checkout.count")}</span>
                   <div className="font-medium text-xs">{orderData.quantity} {t("cfg.pcs")}</div>
                 </div>
               </div>
-              <div className="border-t pt-2">
-                <div className="flex items-baseline justify-between">
-                  <span className="text-sm font-semibold">{t("cfg.summary.total")}</span>
-                  <span className="text-lg font-bold">{new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'UZS', maximumFractionDigits: 0 }).format(orderData.totalPrice)}</span>
+              <div className="border-t pt-4">
+                <div className="flex items-baseline justify-between mb-2">
+                  <span className="text-base font-semibold">{t("cfg.summary.total")}</span>
+                  <span className="text-xl font-bold">{new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'UZS', maximumFractionDigits: 0 }).format(orderData.totalPrice)}</span>
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">{t("checkout.notice")}</p>
+                <p className="text-xs text-muted-foreground">{t("checkout.notice")}</p>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        <div className="grid gap-4 lg:gap-8 lg:grid-cols-3">
+        <div className="grid gap-6 lg:gap-8 lg:grid-cols-3">
           {/* Order Form */}
-          <div className="lg:col-span-2">
-            <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-6">
+          <div className="lg:col-span-2 max-w-sm sm:max-w-md lg:max-w-none mx-auto lg:mx-0">
+            <form onSubmit={handleSubmit} className="space-y-6">
               {/* Contact Information */}
-              <Card className="border-0 shadow-sm">
-                <CardHeader className="pb-2 px-3 pt-3 sm:pb-4 sm:px-6 sm:pt-6">
-                  <CardTitle className="text-base sm:text-xl">{t("checkout.contact")}</CardTitle>
-                  <CardDescription className="text-xs sm:text-sm">{t("checkout.contactDesc")}</CardDescription>
+              <Card className="">
+                <CardHeader className="sm:px-6">
+                  <CardTitle className="text-base sm:text-lg leading-tight">{t("checkout.contact")}</CardTitle>
+                  <CardDescription className="text-xs sm:text-sm leading-tight">{t("checkout.contactDesc")}</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-3 px-3 pb-3 sm:space-y-4 sm:px-6 sm:pb-6">
-                  <div className="space-y-3 sm:grid sm:gap-4 sm:grid-cols-2">
-                    <div className="space-y-1 sm:col-span-2">
-                      <Label htmlFor="fio" className="text-xs sm:text-sm font-medium">{t("checkout.name")} <span className="text-destructive">*</span></Label>
+                <CardContent className="space-y-4 sm:px-6">
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="fio" className="text-sm font-medium">{t("checkout.name")} <span className="text-destructive">*</span></Label>
                       <Input
                         id="fio"
                         required
                         value={formData.fio}
                         onChange={(e) => setFormData({ ...formData, fio: e.target.value })}
                         placeholder={t("checkout.placeholder.name")}
-                        className="h-9 sm:h-10 text-sm"
+                        className="mt-1.5 h-10 text-sm"
                       />
                     </div>
 
-                    <div className="space-y-1">
-                      <Label htmlFor="phone" className="text-xs sm:text-sm font-medium">{t("checkout.phone")} <span className="text-destructive">*</span></Label>
-                      <Input
-                        id="phone"
-                        type="tel"
-                        required
-                        value={formData.phone}
-                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        placeholder={t("checkout.placeholder.phone")}
-                        className="h-9 sm:h-10 text-sm"
-                      />
-                    </div>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div>
+                        <Label htmlFor="phone" className="text-sm font-medium">{t("checkout.phone")} <span className="text-destructive">*</span></Label>
+                        <Input
+                          id="phone"
+                          type="tel"
+                          required
+                          value={formData.phone}
+                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                          placeholder={t("checkout.placeholder.phone")}
+                          className="mt-1.5 h-10 text-sm"
+                        />
+                      </div>
 
-                    <div className="space-y-1">
-                      <Label htmlFor="email" className="text-xs sm:text-sm font-medium">{t("checkout.email")}</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        placeholder={t("checkout.placeholder.email")}
-                        className="h-9 sm:h-10 text-sm"
-                      />
+                      <div>
+                        <Label htmlFor="email" className="text-sm font-medium">{t("checkout.email")}</Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          value={formData.email}
+                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                          placeholder={t("checkout.placeholder.email")}
+                          className="mt-1.5 h-10 text-sm"
+                        />
+                      </div>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
               {/* Address Information */}
-              <Card className="border-0 shadow-sm">
-                <CardHeader className="pb-2 px-3 pt-3 sm:pb-4 sm:px-6 sm:pt-6">
-                  <CardTitle className="text-base sm:text-xl">{t("checkout.address")}</CardTitle>
-                  <CardDescription className="text-xs sm:text-sm">{t("checkout.addressDesc")}</CardDescription>
+              <Card className="">
+                <CardHeader className="sm:px-6">
+                  <CardTitle className="text-base sm:text-lg leading-tight">{t("checkout.address")}</CardTitle>
+                  <CardDescription className="text-xs sm:text-sm leading-tight">{t("checkout.addressDesc")}</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-3 px-3 pb-3 sm:space-y-4 sm:px-6 sm:pb-6">
+                <CardContent className="space-y-4 sm:px-6">
                   <AddressMap onAddressSelect={handleAddressSelect} initialAddress={formData.location} />
 
-                  <div className="space-y-1">
-                    <Label htmlFor="location" className="text-xs sm:text-sm font-medium">{t("checkout.fullAddress")} <span className="text-destructive">*</span></Label>
+                  <div>
+                    <Label htmlFor="location" className="text-sm font-medium">{t("checkout.fullAddress")} <span className="text-destructive">*</span></Label>
                     <Textarea
                       id="location"
                       required
                       value={formData.location}
                       onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                       placeholder={t("checkout.placeholder.fullAddress")}
-                      rows={2}
-                      className="resize-none text-sm"
+                      rows={3}
+                      className="mt-1.5 resize-none text-sm"
                     />
                   </div>
 
-                  <div className="space-y-1">
-                    <Label htmlFor="comments" className="text-xs sm:text-sm font-medium">{t("checkout.comment")}</Label>
+                  <div>
+                    <Label htmlFor="comments" className="text-sm font-medium">{t("checkout.comment")}</Label>
                     <Textarea
                       id="comments"
                       value={formData.comments}
                       onChange={(e) => setFormData({ ...formData, comments: e.target.value })}
                       placeholder={t("checkout.placeholder.comment")}
-                      rows={2}
-                      className="resize-none text-sm"
+                      rows={3}
+                      className="mt-1.5 resize-none text-sm"
                     />
                   </div>
 
-                  <div className="space-y-1">
-                    <Label htmlFor="paymentType" className="text-xs sm:text-sm font-medium">{t("checkout.paymentType")} <span className="text-destructive">*</span></Label>
-                    <PaymentPicker
-                      value={formData.paymentType}
-                      onChange={(value) => setFormData({ ...formData, paymentType: value })}
-                    />
+                  <div>
+                    <Label htmlFor="paymentType" className="text-sm font-medium">{t("checkout.paymentType")} <span className="text-destructive">*</span></Label>
+                    <div className="mt-1.5">
+                      <PaymentPicker
+                        value={formData.paymentType}
+                        onChange={(value) => setFormData({ ...formData, paymentType: value })}
+                      />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -285,7 +289,7 @@ export default function CheckoutPage() {
               <Button 
                 type="submit" 
                 size="lg" 
-                className="w-full h-10 sm:h-12 bg-red-600 hover:bg-red-700 text-white font-medium text-sm sm:text-base" 
+                className="w-full h-12 bg-red-600 hover:bg-red-700 text-white font-semibold text-base" 
                 disabled={isSubmitting}
               >
                 {isSubmitting ? t("checkout.submitting") : t("checkout.submit")}
@@ -295,7 +299,7 @@ export default function CheckoutPage() {
 
           {/* Desktop Order Summary */}
           <div className="hidden lg:block">
-            <Card className="sticky top-6">
+            <Card className="sticky top-18">
               <CardHeader className="pb-4">
                 <CardTitle className="text-lg">{t("checkout.yourOrder")}</CardTitle>
               </CardHeader>
