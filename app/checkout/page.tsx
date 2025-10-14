@@ -69,7 +69,7 @@ export default function CheckoutPage() {
       }
 
       // Send order to API
-      const response = await fetch('/api/orders', {
+      const response = await fetch('https://api.lyukirevizor.uz/api/orders', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
