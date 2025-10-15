@@ -4,8 +4,9 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     
+    
     // Validate required fields
-    const requiredFields = ['fio', 'phone', 'location', 'productType', 'size', 'quantity', 'totalPrice']
+    const requiredFields = ['fio', 'phone', 'productType', 'size', 'quantity', 'totalPrice', 'paymentType', 'location']
     const missingFields = requiredFields.filter(field => !body[field])
     
     if (missingFields.length > 0) {
@@ -15,7 +16,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validate phone number format
+    // Validate phone number format (no spaces)
     const phoneRegex = /^\+998[0-9]{9}$/
     if (!phoneRegex.test(body.phone)) {
       return NextResponse.json(
@@ -35,11 +36,15 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Validate payment type
-    const validPaymentTypes = ['cash', 'card', 'transfer']
+    // Validate payment type (accept localized names)
+    const validPaymentTypes = [
+      'cash', 'card', 'transfer', // English
+      'Наличными', 'Банковской картой', 'Банковский перевод', // Russian
+      'Naqd pul', 'Bank kartasi', 'Bank o\'tkazmasi' // Uzbek
+    ]
     if (body.paymentType && !validPaymentTypes.includes(body.paymentType)) {
       return NextResponse.json(
-        { error: 'Invalid payment type. Use: cash, card, or transfer' },
+        { error: 'Invalid payment type' },
         { status: 400 }
       )
     }
@@ -50,23 +55,19 @@ export async function POST(request: NextRequest) {
       fio: body.fio,
       phone: body.phone,
       email: body.email || null,
-      paymentType: body.paymentType || 'cash',
-      location: body.location,
-      comments: body.comments || null,
       productType: body.productType,
       size: body.size,
       quantity: parseInt(body.quantity),
       totalPrice: parseInt(body.totalPrice),
+      paymentType: body.paymentType,
+      location: body.location,
+      comments: body.comments || null,
+      locationCoords: body.locationCoords || null,
       status: 'new',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     }
 
-    // Here you would typically save to database
-    // For now, we'll just log the order
-    console.log('New order received:', order)
-
-    // Simulate processing delay
     await new Promise(resolve => setTimeout(resolve, 1000))
 
     return NextResponse.json({
@@ -77,7 +78,6 @@ export async function POST(request: NextRequest) {
     }, { status: 201 })
 
   } catch (error) {
-    console.error('Error creating order:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

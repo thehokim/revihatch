@@ -18,9 +18,13 @@ export const metadata: Metadata = {
   title: "Revizor - Премиальные ревизионные люки",
   description: "Невидимые ревизионные люки премиум-класса для идеальной интеграции в интерьер",
   generator: "v0.app",
+  manifest: "/manifest.json",
   icons: {
-    icon: "/favicon-r.svg",
-    shortcut: "/favicon-r.svg",
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon-r.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/favicon.ico",
     apple: "/favicon-r.svg",
   },
 }

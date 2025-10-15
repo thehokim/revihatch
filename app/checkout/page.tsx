@@ -25,11 +25,77 @@ interface OrderData {
 }
 
 export default function CheckoutPage() {
-  const { t } = useI18n() as any
+  const { t, lang } = useI18n() as any
   const router = useRouter()
   const [orderData, setOrderData] = useState<OrderData | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
+  const [addressCoords, setAddressCoords] = useState<{lat: number, lng: number} | null>(null)
+
+  // Функция форматирования номера телефона
+  const formatPhoneNumber = (value: string) => {
+    // Удаляем все символы кроме цифр и +
+    const cleaned = value.replace(/[^\d+]/g, '')
+    
+    // Если номер начинается с +998, форматируем его
+    if (cleaned.startsWith('+998')) {
+      const digits = cleaned.slice(4) // Убираем +998
+      if (digits.length <= 9) {
+        // Форматируем как +998 XX XXX XX XX
+        if (digits.length <= 2) {
+          return `+998 ${digits}`
+        } else if (digits.length <= 5) {
+          return `+998 ${digits.slice(0, 2)} ${digits.slice(2)}`
+        } else if (digits.length <= 7) {
+          return `+998 ${digits.slice(0, 2)} ${digits.slice(2, 5)} ${digits.slice(5)}`
+        } else {
+          return `+998 ${digits.slice(0, 2)} ${digits.slice(2, 5)} ${digits.slice(5, 7)} ${digits.slice(7, 9)}`
+        }
+      }
+    }
+    
+    // Если номер начинается с 998, добавляем +
+    if (cleaned.startsWith('998')) {
+      return formatPhoneNumber('+' + cleaned)
+    }
+    
+    // Если номер начинается с цифр без кода страны, добавляем +998
+    if (cleaned.match(/^[0-9]+$/)) {
+      return formatPhoneNumber('+998' + cleaned)
+    }
+    
+    return cleaned
+  }
+
+  // Функция для получения русского названия продукта (для сервера)
+  const getRussianProductName = (modelName: string) => {
+    const productNames: Record<string, string> = {
+      'transformer': 'Люк под покраску',
+      'anodos': 'Люк настенный «Универсал»',
+      'floor': 'Напольный люк',
+      'napolny': 'Напольный люк',
+      'universal': 'Напольный люк'
+    }
+    
+    // Если modelName уже содержит полный ключ, извлекаем базовое имя
+    if (modelName.startsWith('cfg.products.')) {
+      const baseModel = modelName.replace('cfg.products.', '').replace('.name', '')
+      return productNames[baseModel] || 'Люк под покраску'
+    }
+    
+    return productNames[modelName] || 'Люк под покраску'
+  }
+
+  // Функция для получения русского способа оплаты (для сервера)
+  const getRussianPaymentType = (paymentType: string) => {
+    const paymentTypes: Record<string, string> = {
+      'cash': 'Наличными',
+      'card': 'Банковской картой',
+      'transfer': 'Банковский перевод'
+    }
+    
+    return paymentTypes[paymentType] || 'Наличными'
+  }
 
   const [formData, setFormData] = useState({
     fio: "",
@@ -57,15 +123,16 @@ export default function CheckoutPage() {
       // Prepare order data for API
       const orderPayload = {
         fio: formData.fio,
-        phone: formData.phone,
+        phone: formData.phone.replace(/\s/g, ''), // Remove spaces from phone
         email: formData.email || undefined,
-        paymentType: formData.paymentType,
-        location: formData.location,
-        comments: formData.comments || undefined,
-        productType: orderData?.modelName || "Unknown",
-        size: `${orderData?.width} × ${orderData?.height} ${t("cfg.units.cm")}`,
+        productType: getRussianProductName(orderData?.modelName || "transformer"),
+        size: `${orderData?.width} × ${orderData?.height} см`,
         quantity: orderData?.quantity || 1,
-        totalPrice: orderData?.totalPrice || 0
+        totalPrice: orderData?.totalPrice || 0,
+        paymentType: getRussianPaymentType(formData.paymentType),
+        location: formData.location, // Keep as string address
+        comments: formData.comments || undefined,
+        locationCoords: addressCoords ? [addressCoords.lat, addressCoords.lng] : undefined
       }
 
       // Send order to API
@@ -102,15 +169,19 @@ export default function CheckoutPage() {
       localStorage.removeItem("currentOrder")
 
     } catch (error) {
-      console.error('Error submitting order:', error)
       setIsSubmitting(false)
-      // You could add error state here to show error message to user
       alert('Ошибка при оформлении заказа. Попробуйте еще раз.')
     }
   }
 
   const handleAddressSelect = (address: string, lat: number, lng: number) => {
     setFormData({ ...formData, location: address })
+    setAddressCoords({ lat, lng })
+  }
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatPhoneNumber(e.target.value)
+    setFormData({ ...formData, phone: formatted })
   }
 
   if (isSuccess) {
@@ -218,8 +289,8 @@ export default function CheckoutPage() {
                           type="tel"
                           required
                           value={formData.phone}
-                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                          placeholder={t("checkout.placeholder.phone")}
+                          onChange={handlePhoneChange}
+                          placeholder="+998 90 123 45 67"
                           className="mt-1.5 h-10 text-sm"
                         />
                       </div>

@@ -1,6 +1,6 @@
 "use client"
 
-import { Suspense } from "react"
+import { Suspense, useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import Image from "next/image"
 import { ProductConfigurator } from "@/components/product-configurator"
@@ -10,6 +10,11 @@ function ConfiguratorContent() {
   const { t } = useI18n() as any
   const searchParams = useSearchParams()
   const modelParam = searchParams.get("model")
+  const [isMounted, setIsMounted] = useState(false)
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   // Get images based on model
   const getImagesForModel = (model: string) => {
@@ -51,6 +56,10 @@ function ConfiguratorContent() {
   }
 
   const images = getImagesForModel(modelParam || "transformer")
+
+  if (!isMounted) {
+    return null
+  }
 
   return (
     <main>

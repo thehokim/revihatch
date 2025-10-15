@@ -1,0 +1,21 @@
+{
+  "name": "Revizor - Премиальные ревизионные люки",
+  "short_name": "Revizor",
+  "description": "Невидимые ревизионные люки премиум-класса для идеальной интеграции в интерьер",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "/favicon-r.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/favicon.ico",
+      "sizes": "16x16 32x32",
+      "type": "image/x-icon"
+    }
+  ]
+}
