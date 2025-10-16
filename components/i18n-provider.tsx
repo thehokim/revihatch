@@ -147,7 +147,7 @@ const ru: Messages = {
   "faq.q3.q": "Какое покрытие выбрать?",
   "faq.q3.a": "Для влажных помещений рекомендуем порошковое покрытие или анодирование. Для сухих помещений подойдет любой вариант. Все покрытия долговечны и легко моются.",
   "faq.q4.q": "Какие сроки изготовления?",
-  "faq.q4.a": "Стандартные размеры — 3-5 рабочих дней. Нестандартные размеры — 7-10 рабочих дней. Доставка по Москве — 1-2 дня, по России — 3-7 дней.",
+  "faq.q4.a": "Стандартные размеры — 3-5 рабочих дней. Нестандартные размеры — 7-10 рабочих дней.",
   "faq.q5.q": "Есть ли гарантия?",
   "faq.q5.a": "Да, на все наши изделия предоставляется гарантия 5 лет. Гарантия покрывает производственные дефекты и проблемы с механизмами.",
 
@@ -452,7 +452,7 @@ const uz: Messages = {
   "faq.q3.q": "Qaysi qoplamani tanlash kerak?",
   "faq.q3.a": "Nam xonalar uchun kukunli qoplama yoki anodlashni tavsiya qilamiz. Quruq xonalar uchun har qanday variant mos. Barcha qoplamalar chidamli va oson tozalanadi.",
   "faq.q4.q": "Ishlab chiqarish muddatlari qanday?",
-  "faq.q4.a": "Standart o‘lchamlar — 3–5 ish kuni. Nostal o‘lchamlar — 7–10 ish kuni. Toshkent bo‘yicha yetkazib berish — 1–2 kun.",
+  "faq.q4.a": "Standart o‘lchamlar — 3–5 ish kuni. Nostal o‘lchamlar — 7–10 ish kuni.",
   "faq.q5.q": "Kafolat bormi?",
   "faq.q5.a": "Ha, barcha mahsulotlarimizga 5 yil kafolat beriladi. Kafolat ishlab chiqarishdagi nuqsonlar va mexanizmlardagi muammolarni qamrab oladi.",
 
