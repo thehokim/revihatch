@@ -221,12 +221,12 @@ export default function AboutPage() {
               {/* Contacts */}
               <div>
                 <h3 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-3 text-black">{t("about.contact.contactsTitle")}</h3>
-                <p className="text-sm sm:text-base text-black">+9989 906 8180</p>
+                <p className="text-sm sm:text-base text-black">+998 90 906 81 80</p>
               </div>
 
               {/* Call Button */}
               <div>
-                <a href="tel:+998990968180" className="inline-flex items-center justify-center rounded-lg bg-red-600 px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base font-medium text-white transition-colors hover:bg-red-700">
+                <a href="tel:+998909068180" className="inline-flex items-center justify-center rounded-lg bg-red-600 px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base font-medium text-white transition-colors hover:bg-red-700">
                   {t("about.contact.callBtn")}
                 </a>
               </div>

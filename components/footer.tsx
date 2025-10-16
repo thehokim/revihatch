@@ -40,7 +40,7 @@ export function Footer() {
                   href="/configurator?model=transformer"
                   className="hover:text-gray-300"
                 >
-                  Люк под покраску
+                  {t("products.transformer.name")}
                 </Link>
               </li>
               <li>
@@ -48,7 +48,7 @@ export function Footer() {
                   href="/configurator?model=universal"
                   className="hover:text-gray-300"
                 >
-                  Напольный люк
+                  {t("products.universal.name")}
                 </Link>
               </li>
               <li>
@@ -56,7 +56,7 @@ export function Footer() {
                   href="/configurator?model=floor"
                   className="hover:text-gray-300"
                 >
-                  Люк «Универсал»
+                  {t("products.floor.name")}
                 </Link>
               </li>
               <li>
@@ -64,7 +64,7 @@ export function Footer() {
                   href="/configurator?model=anodos"
                   className="hover:text-gray-300"
                 >
-                  Люк «Трансформер»
+                  {t("products.anodos.name")}
                 </Link>
               </li>
             </ul>
@@ -75,23 +75,18 @@ export function Footer() {
             <h3 className="mb-2 md:mb-4 font-bold text-white">{t("about.hero.aboutBtn")}</h3>
             <ul className="space-y-1 md:space-y-2 text-sm text-white">
               <li>
-                <Link href="#about" className="hover:text-gray-300">
+                <Link href="/about" className="hover:text-gray-300">
                   {t("footer.about")}
                 </Link>
               </li>
               <li>
-                <Link href="#reviews" className="hover:text-gray-300">
+                <Link href="/#reviews" className="hover:text-gray-300">
                   {t("nav.reviews")}
                 </Link>
               </li>
               <li>
-                <Link href="#faq" className="hover:text-gray-300">
+                <Link href="/#faq" className="hover:text-gray-300">
                   {t("nav.faq")}
-                </Link>
-              </li>
-              <li>
-                <Link href="/admin" className="hover:text-gray-300">
-                  Admin
                 </Link>
               </li>
             </ul>
@@ -101,7 +96,7 @@ export function Footer() {
           <div>
             <h3 className="mb-2 md:mb-4 font-bold text-white">{t("footer.contacts")}</h3>
             <ul className="space-y-1 md:space-y-2 text-sm text-white">
-              <li>+9989 906-81-80</li>
+              <li>+998 90 906 81 80</li>
               <li>info@revizor.uz</li>
               <li>{t("footer.address")}</li>
             </ul>
@@ -111,6 +106,11 @@ export function Footer() {
         {/* Separator and Copyright */}
         <div className="mt-6 md:mt-12 border-t border-gray-400 pt-4 md:pt-8 text-center text-sm text-white">
           <p>{t("footer.copyright")}</p>
+        </div>
+        <div className="flex justify-center items-center gap-2 text-gray-500 hover:text-gray-200">
+          <p className="text-center text-sm mt-2">Made by <a href="https://github.com/thehokim" className="underline hover:text-gray-300">Hokimxo'ja</a></p>
+          <span className="flex items-center justify-center mt-2">&</span>
+          <p className="text-center text-sm mt-2"><a href="https://github.com/ilxomkh" className="underline hover:text-gray-300">Ilxomkh</a></p>
         </div>
       </div>
     </footer>
