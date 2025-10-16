@@ -6,14 +6,29 @@ import Link from "next/link"
 import Image from "next/image"
 import { useI18n } from "@/components/i18n-provider"
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 
 export function Hero() {
   const { t } = useI18n() as any
+  const router = useRouter()
   const [hoveredHatch, setHoveredHatch] = useState<number | null>(null)
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [clickedHatch, setClickedHatch] = useState<number | null>(null)
+
+  const hatchModelMap: Record<number, string> = {
+    1: "transformer",
+    2: "anodos",
+    3: "anodos",
+    4: "napolny"
+  }
   
-  // Handle mobile click
+  const handleHatchClick = (hatchId: number) => {
+    const model = hatchModelMap[hatchId]
+    if (model) {
+      router.push(`/configurator?model=${model}`)
+    }
+  }
+  
   const handleMobileClick = (hatchId: number) => {
     if (clickedHatch === hatchId) {
       setClickedHatch(null)
@@ -27,52 +42,45 @@ export function Hero() {
   const hatches = [
     {
       id: 1,
-      name: "Люк под покраску",
+      name: t("hero.hatches.paint"),
       image: "/5.png",
       position: "top-[25%] left-[20%]"
     },
     {
       id: 2,
-      name: "Люк в стене",
+      name: t("hero.hatches.wall"),
       image: "/4.png", 
       position: "top-[42%] left-[20%]"
     },
     {
       id: 3,
-      name: "Люк в плитке",
+      name: t("hero.hatches.tile"),
       image: "/3.png",
       position: "top-[60%] left-[20%]"
     },
     {
       id: 4,
-      name: "Люк в полу",
+      name: t("hero.hatches.floor"),
       image: "/2.png",
       position: "top-[75%] left-[20%]"
     }
   ]
 
   return (
-    <section className="relative overflow-hidden bg-[#313131] py-4 lg:py-6">
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#9ca3af15_1px,transparent_1px),linear-gradient(to_bottom,#9ca3af15_1px,transparent_1px)] bg-[size:25px_25px] rotate-[30deg] origin-center scale-180" />
-          {/* Gradient masks for sides */}
-          <div className="absolute inset-y-0 left-0 w-full bg-gradient-to-r from-[#313131] via-transparent to-transparent" />
-          <div className="absolute inset-y-0 right-0 w-full bg-gradient-to-l from-[#313131] via-transparent to-transparent" />
+    <section className="relative overflow-hidden min-h-[600px] sm:min-h-[700px] md:min-h-[800px] lg:min-h-[848px] justify-center items-center flex py-8 sm:py-12 md:py-16">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,#2D2D2D_0%,#1B1B1B_100%)]">
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#FFFFFF08_0.5px,transparent_0.5px),linear-gradient(to_bottom,#FFFFFF08_0.5px,transparent_0.5px)] bg-[size:7px_7px] rotate-[71.13deg] origin-center scale-600" />
+          <div className="absolute inset-y-0 left-0 w-full bg-gradient-to-r from-[#1B1B1B] via-transparent to-transparent" />
+          <div className="absolute inset-y-0 right-0 w-full bg-gradient-to-l from-[#1B1B1B] via-transparent to-transparent" />
         </div>
-      
-      {/* Blue line at bottom */}
-      
-      <div className="relative container mx-auto px-4">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Left Section - Text and Buttons */}
-          <div className="space-y-8">
-            {/* Badge */}
+      <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex lg:flex-row flex-col justify-between items-center gap-8 sm:gap-10 md:gap-12">
+          <div className="space-y-4 sm:space-y-6 md:space-y-8 w-full lg:w-auto">
             <div className="inline-block rounded-full bg-[#ffffff]/10 border border-white/50 px-3 py-1">
-              <span className="text-sm font-medium text-white">{t("hero.badge")}</span>
+              <span className="text-xs sm:text-sm font-medium text-white">{t("hero.badge")}</span>
             </div>
 
-            {/* Main Heading */}
-            <h1 className="text-4xl lg:text-6xl font-bold text-white leading-tight">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white leading-tight" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700 }}>
               {t("hero.title1")}
               <br />
               {t("hero.title2")}
@@ -80,24 +88,21 @@ export function Hero() {
               {t("hero.title3")}
             </h1>
 
-            {/* Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" className="group bg-white text-gray-800 hover:bg-gray-100 border border-gray-300 rounded-lg px-6 py-3" asChild>
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+              <Button size="lg" className="group bg-white text-gray-800 hover:bg-gray-100 border border-gray-300 rounded-lg px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base" asChild>
                 <Link href="/configurator">
                   {t("hero.configurator")}
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" className="border border-white/50 bg-white/10 text-white hover:bg-white/20 hover:text-white rounded-lg px-6 py-3" asChild>
+              <Button size="lg" variant="outline" className="border border-white/50 bg-white/10 text-white hover:bg-white/20 hover:text-white rounded-lg px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base" asChild>
                 <Link href="#products">{t("hero.viewModels")}</Link>
               </Button>
             </div>
           </div>
 
-          {/* Right Section - Interactive Image */}
-          <div className="relative flex justify-center items-center">
-            <div className="relative w-full max-w-lg">
-              {/* Background Image (always visible) */}
+          <div className="relative flex justify-center items-center w-full lg:w-auto">
+            <div className="relative w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg">
               <Image
                 src="/Herolyuk.png"
                 alt="3D модель угла комнаты с люком"
@@ -107,7 +112,6 @@ export function Hero() {
                 priority
               />
               
-              {/* Overlay Image (appears on hover or click) */}
               {hoveredHatch && (
                 <Image
                   src={hatches.find(h => h.id === hoveredHatch)?.image || "/Herolyuk.png"}
@@ -118,7 +122,6 @@ export function Hero() {
                 />
               )}
               
-              {/* Interactive Plus Icons */}
               {hatches.map((hatch) => (
                 <div
                   key={hatch.id}
@@ -141,9 +144,8 @@ export function Hero() {
                       }, 50)
                     }
                   }}
-                  onClick={() => handleMobileClick(hatch.id)}
+                  onClick={() => handleHatchClick(hatch.id)}
                 >
-                  {/* Plus Icon */}
                   <div className="relative group cursor-pointer">
                     <div className={`w-8 h-8 bg-white/10 border border-white/50 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-300 ${
                       clickedHatch === hatch.id ? 'bg-white/20 border-white/70' : ''
@@ -151,12 +153,11 @@ export function Hero() {
                       <Plus className="w-4 h-4 text-white" />
                     </div>
                     
-                    {/* Hatch Name Label - Hidden on mobile */}
-                    <div className={`absolute right-10 top-1/2 -translate-y-1/2 bg-white/10 border border-white/50 text-white px-3 py-1 rounded-lg text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none hidden md:block ${
+                    <div className={`absolute right-16 top-1/2 -translate-y-1/2 bg-[#2D2D2D] border border-white/50 text-white px-4 py-2 rounded-lg text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none hidden md:block ${
                       hoveredHatch === hatch.id ? 'opacity-100' : ''
                     }`}>
                       {hatch.name}
-                      <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1 w-2 h-2 bg-[#313131] border-t border-r border-white/50 rotate-45"></div>
+                      <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-[7px] w-3 h-3 bg-[#2D2D2D] border-t border-r border-white/50 rotate-45"></div>
                     </div>
                   </div>
                 </div>
@@ -168,3 +169,4 @@ export function Hero() {
     </section>
   )
 }
+

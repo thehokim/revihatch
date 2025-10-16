@@ -15,10 +15,10 @@ export function FAQ() {
 
   return (
     <section id="faq" className="bg-background py-6">
-      <div className="container mx-auto px-4">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-16 text-center">
-          <h2 className="mb-4 text-balance text-4xl font-bold tracking-tight md:text-5xl">{t("faq.title")}</h2>
-          <p className="mx-auto max-w-2xl text-pretty text-lg leading-relaxed text-muted-foreground">{t("faq.subtitle")}</p>
+          <h2 className="mb-4 text-balance text-black text-center text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: 'clamp(20px, 4vw, 48px)', lineHeight: '100%', letterSpacing: '0%' }}>{t("faq.title")}</h2>
+          <p className="mx-auto max-w-2xl text-pretty text-lg leading-relaxed text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 400 }}>{t("faq.subtitle")}</p>
         </div>
 
         <div className="mx-auto max-w-3xl">

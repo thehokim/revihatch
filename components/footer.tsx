@@ -7,17 +7,15 @@ import { useI18n } from "@/components/i18n-provider";
 export function Footer() {
   const { t } = useI18n() as any;
   return (
-    <footer className="relative overflow-hidden bg-[#313131]">
-      {/* Background Grid Pattern - same as Hero */}
-      <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#9ca3af15_1px,transparent_1px),linear-gradient(to_bottom,#9ca3af15_1px,transparent_1px)] bg-[size:20px_20px] rotate-[20deg] origin-center scale-230" />
-        <div className="absolute inset-y-0 left-0 w-full bg-gradient-to-r from-[#313131] via-transparent to-transparent" />
-          <div className="absolute inset-y-0 right-0 w-full bg-gradient-to-l from-[#313131] via-transparent to-transparent" />
+    <footer className="relative overflow-hidden">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,#2D2D2D_0%,#1B1B1B_100%)]">
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#FFFFFF08_0.5px,transparent_0.5px),linear-gradient(to_bottom,#FFFFFF08_0.5px,transparent_0.5px)] bg-[size:7px_7px] rotate-[71.13deg] origin-center scale-600" />
+      <div className="absolute inset-y-0 left-0 w-full bg-gradient-to-r from-[#1B1B1B] via-transparent to-transparent" />
+          <div className="absolute inset-y-0 right-0 w-full bg-gradient-to-l from-[#1B1B1B] via-transparent to-transparent" />
       </div>
 
-      <div className="relative z-10 container mx-auto px-4 py-8 md:py-12 text-white">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 text-white">
         <div className="grid gap-4 md:gap-8 grid-cols-2 md:grid-cols-4">
-          {/* Logo and Description */}
           <div>
             <div className="mb-2 md:mb-4">
               <Image
@@ -31,7 +29,6 @@ export function Footer() {
             <p className="text-sm leading-relaxed text-white">{t("footer.tagline")}</p>
           </div>
 
-          {/* Products */}
           <div>
             <h3 className="mb-2 md:mb-4 font-bold text-white">{t("footer.products")}</h3>
             <ul className="space-y-1 md:space-y-2 text-sm text-white">
@@ -45,7 +42,7 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/configurator?model=universal"
+                  href="/configurator?model=napolny"
                   className="hover:text-gray-300"
                 >
                   {t("products.universal.name")}
@@ -53,7 +50,7 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/configurator?model=floor"
+                  href="/configurator?model=anodos"
                   className="hover:text-gray-300"
                 >
                   {t("products.floor.name")}
@@ -70,7 +67,6 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Company Info */}
           <div>
             <h3 className="mb-2 md:mb-4 font-bold text-white">{t("about.hero.aboutBtn")}</h3>
             <ul className="space-y-1 md:space-y-2 text-sm text-white">
@@ -92,7 +88,6 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Contacts */}
           <div>
             <h3 className="mb-2 md:mb-4 font-bold text-white">{t("footer.contacts")}</h3>
             <ul className="space-y-1 md:space-y-2 text-sm text-white">
@@ -103,7 +98,6 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Separator and Copyright */}
         <div className="mt-6 md:mt-12 border-t border-gray-400 pt-4 md:pt-8 text-center text-sm text-white">
           <p>{t("footer.copyright")}</p>
         </div>

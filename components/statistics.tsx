@@ -14,7 +14,6 @@ export function Statistics() {
 
   return (
     <section className="relative overflow-hidden">
-      {/* Background Image */}
       <div className="absolute inset-0">
         <Image
           src="/sklad.jpg"
@@ -29,12 +28,11 @@ export function Statistics() {
             objectPosition: 'center 35%',
           }}
         />
-        {/* Dark overlay for text readability */}
         <div className="absolute inset-0 bg-black/75" />
       </div>
       
       <div className="relative z-10 py-12">
-        <div className="container mx-auto px-4">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid gap-6 md:grid-cols-4">
             {stats.map((stat, index) => (
               <div key={index} className="text-center">

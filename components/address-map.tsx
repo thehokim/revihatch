@@ -26,7 +26,6 @@ interface SavedAddress {
   lng: number
 }
 
-// Leaflet типы
 declare global {
   interface Window {
     L: any
@@ -47,7 +46,6 @@ export function AddressMap({ onAddressSelect, initialAddress }: AddressMapProps)
   const mapInstanceRef = useRef<any>(null)
   const markerRef = useRef<any>(null)
 
-  // Create custom marker icon
   const createCustomMarker = (address: string) => {
     return window.L.divIcon({
       className: 'custom-marker',
@@ -67,7 +65,6 @@ export function AddressMap({ onAddressSelect, initialAddress }: AddressMapProps)
     })
   }
 
-  // Load saved addresses from localStorage
   useEffect(() => {
     const saved = localStorage.getItem("savedAddresses")
     if (saved) {
@@ -75,16 +72,13 @@ export function AddressMap({ onAddressSelect, initialAddress }: AddressMapProps)
     }
   }, [])
 
-  // Load Leaflet Maps API
   useEffect(() => {
     if (!window.L) {
-      // Load Leaflet CSS
       const link = document.createElement('link')
       link.rel = 'stylesheet'
       link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'
       document.head.appendChild(link)
       
-      // Load Leaflet JS
       const script = document.createElement('script')
       script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
       script.async = true
@@ -97,12 +91,10 @@ export function AddressMap({ onAddressSelect, initialAddress }: AddressMapProps)
     }
   }, [])
 
-  // Initialize map when loaded
   useEffect(() => {
     if (mapLoaded && showMap && mapRef.current && !mapInstanceRef.current) {
       const map = window.L.map(mapRef.current).setView([41.2995, 69.2401], 12)
 
-      // Add beautiful CartoDB tiles with better styling
       window.L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
         attribution: '© OpenStreetMap contributors © CARTO',
         subdomains: 'abcd',
@@ -111,12 +103,10 @@ export function AddressMap({ onAddressSelect, initialAddress }: AddressMapProps)
 
       mapInstanceRef.current = map
 
-      // Add click handler to map
       map.on('click', (e: any) => {
         const coords = e.latlng
         setSelectedCoords({ lat: coords.lat, lng: coords.lng })
         
-        // Reverse geocoding to get address using Nominatim
         fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${coords.lat}&lon=${coords.lng}&accept-language=${lang}`)
           .then(response => response.json())
           .then(data => {
@@ -125,7 +115,6 @@ export function AddressMap({ onAddressSelect, initialAddress }: AddressMapProps)
             setSearchQuery(address)
             onAddressSelect(address, coords.lat, coords.lng)
             
-            // Add marker
             if (markerRef.current) {
               map.removeLayer(markerRef.current)
             }
@@ -163,7 +152,6 @@ export function AddressMap({ onAddressSelect, initialAddress }: AddressMapProps)
     }
   }, [mapLoaded, showMap])
 
-  // Debounced search
   useEffect(() => {
     if (searchQuery.length < 3) {
       setSuggestions([])
@@ -193,7 +181,6 @@ export function AddressMap({ onAddressSelect, initialAddress }: AddressMapProps)
     onAddressSelect(suggestion.display_name, lat, lng)
     setSuggestions([])
     
-    // Update map if it's open
     if (mapInstanceRef.current) {
       mapInstanceRef.current.setView([lat, lng], 15)
       if (markerRef.current) {
@@ -216,7 +203,6 @@ export function AddressMap({ onAddressSelect, initialAddress }: AddressMapProps)
     onAddressSelect(address.address, address.lat, address.lng)
     setShowSaved(false)
     
-    // Update map if it's open
     if (mapInstanceRef.current) {
       mapInstanceRef.current.setView([address.lat, address.lng], 15)
       if (markerRef.current) {
@@ -254,7 +240,6 @@ export function AddressMap({ onAddressSelect, initialAddress }: AddressMapProps)
 
   return (
     <div className="space-y-2 sm:space-y-3">
-      {/* Search Input */}
       <div className="relative">
         <div className="relative group">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" />
@@ -267,7 +252,6 @@ export function AddressMap({ onAddressSelect, initialAddress }: AddressMapProps)
           />
         </div>
 
-        {/* Action buttons */}
         <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1.5">
           <Button
             size="sm"
@@ -309,7 +293,6 @@ export function AddressMap({ onAddressSelect, initialAddress }: AddressMapProps)
         )}
       </div>
 
-      {/* Interactive Map */}
       {showMap && (
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground bg-muted/50 px-3 py-2 rounded-lg">
@@ -332,7 +315,6 @@ export function AddressMap({ onAddressSelect, initialAddress }: AddressMapProps)
         </div>
       )}
 
-      {/* Saved Addresses */}
       {showSaved && savedAddresses.length > 0 && (
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground bg-muted/50 px-3 py-2 rounded-lg">
@@ -356,10 +338,6 @@ export function AddressMap({ onAddressSelect, initialAddress }: AddressMapProps)
           </div>
         </div>
       )}
-
-
-
-      {/* Compact Hint */}
       {suggestions.length === 0 && !showMap && (
         <div className="bg-muted/30 px-4 py-3 rounded-xl border border-border/50">
           <p className="text-sm text-muted-foreground text-center">{t("map.hint")}</p>

@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+import { Suspense } from "react"
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
@@ -11,6 +12,7 @@ import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { LogOut, Package, ShoppingCart, TrendingUp } from "lucide-react"
+import { PageSkeleton } from "@/components/page-skeleton"
 
 interface Order {
   id: string
@@ -32,7 +34,7 @@ interface Order {
   createdAt: string
 }
 
-export default function AdminPage() {
+function AdminPageContent() {
   const router = useRouter()
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [password, setPassword] = useState("")
@@ -56,7 +58,6 @@ export default function AdminPage() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
-    // Simple password check (in production, use proper authentication)
     if (password === "admin123") {
       localStorage.setItem("adminAuth", "true")
       setIsAuthenticated(true)
@@ -119,7 +120,7 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-50 border-b border-border/40 bg-background/95 backdrop-blur">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
+        <div className="w-full max-w-7xl mx-auto flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded bg-primary">
               <span className="text-lg font-bold text-primary-foreground">R</span>
@@ -133,13 +134,12 @@ export default function AdminPage() {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h1 className="mb-2 text-4xl font-bold tracking-tight">Панель управления</h1>
           <p className="text-lg text-muted-foreground">Управление заказами и продуктами</p>
         </div>
 
-        {/* Statistics */}
         <div className="mb-8 grid gap-4 md:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -182,7 +182,6 @@ export default function AdminPage() {
           </Card>
         </div>
 
-        {/* Orders Management */}
         <Card>
           <CardHeader>
             <CardTitle>Управление заказами</CardTitle>
@@ -362,5 +361,13 @@ function OrderCard({
         </div>
       </CardContent>
     </Card>
+  )
+}
+
+export default function AdminPage() {
+  return (
+    <Suspense fallback={<PageSkeleton variant="admin" />}>
+      <AdminPageContent />
+    </Suspense>
   )
 }

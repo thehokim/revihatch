@@ -21,11 +21,15 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
   icons: {
     icon: [
-      { url: "/favicon.ico", sizes: "any" },
-      { url: "/favicon-r.svg", type: "image/svg+xml" },
+      { url: "/favicon-r.svg", sizes: "any", type: "image/svg+xml" },
+      { url: "/favicon-16x16.svg", sizes: "16x16", type: "image/svg+xml" },
+      { url: "/favicon-32x32.svg", sizes: "32x32", type: "image/svg+xml" },
+      { url: "/favicon-48x48.svg", sizes: "48x48", type: "image/svg+xml" },
     ],
-    shortcut: "/favicon.ico",
-    apple: "/favicon-r.svg",
+    shortcut: "/favicon-r.svg",
+    apple: [
+      { url: "/favicon-192x192.svg", sizes: "192x192", type: "image/svg+xml" },
+    ],
   },
 }
 

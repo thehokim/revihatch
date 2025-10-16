@@ -10,34 +10,33 @@ const products = [
     id: "transformer",
     name: "Transformer",
     description: "",
-    image: "/lyuk1.png",
+    image: "/tra3.jpg",
   },
   {
     id: "floor",
     name: "Floor",
     description: "",
-    image: "/lyuk3.png",
+    image: "ano1.jpg",
   },
   {
     id: "universal",
     name: "Universal",
     description: "",
-    image: "/lyuk2.png",
+    image: "/nap1.jpg",
   },
   {
     id: "anodos",
     name: "Anodos",
     description: "",
-    image: "/lyuk4.png",
+    image: "/nap3.jpg",
   },
 ]
 
-// ручное переназначение маршрутов
 const redirectMap: Record<string, string> = {
-  transformer: "/configurator?model=transformer", // без изменений
-  floor: "/configurator?model=anodos",            // второй ведёт на anodos
-  universal: "/configurator?model=floor",         // третий ведёт на floor
-  anodos: "/configurator?model=anodos",           // последний без изменений
+  transformer: "/configurator?model=transformer",
+  floor: "/configurator?model=anodos",
+  universal: "/configurator?model=napolny",
+  anodos: "/configurator?model=anodos",
 }
 
 export function ProductGrid() {
@@ -45,10 +44,10 @@ export function ProductGrid() {
 
   return (
     <section id="products" className="bg-white py-16 px-4 sm:px-0">
-      <div className="container mx-auto">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8 text-center">
-          <h2 className="mb-4 text-4xl font-bold text-black">{t("products.title")}</h2>
-          <p className="text-lg text-black">{t("products.subtitle")}</p>
+          <h2 className="mb-4 text-black text-center text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: 'clamp(20px, 4vw, 48px)', lineHeight: '100%', letterSpacing: '0%' }}>{t("products.title")}</h2>
+          <p className="text-lg text-black" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 400 }}>{t("products.subtitle")}</p>
         </div>
 
         <div className="grid gap-6 sm:gap-8 justify-items-center sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

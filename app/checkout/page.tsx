@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+import { Suspense } from "react"
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
@@ -13,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { CheckCircle2 } from "lucide-react"
 import { AddressMap } from "@/components/address-map"
 import { PaymentPicker } from "@/components/payment-picker"
+import { PageSkeleton } from "@/components/page-skeleton"
 
 interface OrderData {
   model: string
@@ -24,7 +26,7 @@ interface OrderData {
   totalPrice: number
 }
 
-export default function CheckoutPage() {
+function CheckoutPageContent() {
   const { t, lang } = useI18n() as any
   const router = useRouter()
   const [orderData, setOrderData] = useState<OrderData | null>(null)
@@ -32,16 +34,11 @@ export default function CheckoutPage() {
   const [isSuccess, setIsSuccess] = useState(false)
   const [addressCoords, setAddressCoords] = useState<{lat: number, lng: number} | null>(null)
 
-  // Функция форматирования номера телефона
   const formatPhoneNumber = (value: string) => {
-    // Удаляем все символы кроме цифр и +
     const cleaned = value.replace(/[^\d+]/g, '')
-    
-    // Если номер начинается с +998, форматируем его
     if (cleaned.startsWith('+998')) {
-      const digits = cleaned.slice(4) // Убираем +998
+      const digits = cleaned.slice(4)
       if (digits.length <= 9) {
-        // Форматируем как +998 XX XXX XX XX
         if (digits.length <= 2) {
           return `+998 ${digits}`
         } else if (digits.length <= 5) {
@@ -54,12 +51,10 @@ export default function CheckoutPage() {
       }
     }
     
-    // Если номер начинается с 998, добавляем +
     if (cleaned.startsWith('998')) {
       return formatPhoneNumber('+' + cleaned)
     }
     
-    // Если номер начинается с цифр без кода страны, добавляем +998
     if (cleaned.match(/^[0-9]+$/)) {
       return formatPhoneNumber('+998' + cleaned)
     }
@@ -67,7 +62,6 @@ export default function CheckoutPage() {
     return cleaned
   }
 
-  // Функция для получения русского названия продукта (для сервера)
   const getRussianProductName = (modelName: string) => {
     const productNames: Record<string, string> = {
       'transformer': 'Люк под покраску',
@@ -77,7 +71,6 @@ export default function CheckoutPage() {
       'universal': 'Напольный люк'
     }
     
-    // Если modelName уже содержит полный ключ, извлекаем базовое имя
     if (modelName.startsWith('cfg.products.')) {
       const baseModel = modelName.replace('cfg.products.', '').replace('.name', '')
       return productNames[baseModel] || 'Люк под покраску'
@@ -86,7 +79,6 @@ export default function CheckoutPage() {
     return productNames[modelName] || 'Люк под покраску'
   }
 
-  // Функция для получения русского способа оплаты (для сервера)
   const getRussianPaymentType = (paymentType: string) => {
     const paymentTypes: Record<string, string> = {
       'cash': 'Наличными',
@@ -120,22 +112,20 @@ export default function CheckoutPage() {
     setIsSubmitting(true)
 
     try {
-      // Prepare order data for API
       const orderPayload = {
         fio: formData.fio,
-        phone: formData.phone.replace(/\s/g, ''), // Remove spaces from phone
+        phone: formData.phone.replace(/\s/g, ''),
         email: formData.email || undefined,
         productType: getRussianProductName(orderData?.modelName || "transformer"),
         size: `${orderData?.width} × ${orderData?.height} см`,
         quantity: orderData?.quantity || 1,
         totalPrice: orderData?.totalPrice || 0,
         paymentType: getRussianPaymentType(formData.paymentType),
-        location: formData.location, // Keep as string address
+        location: formData.location,
         comments: formData.comments || undefined,
         locationCoords: addressCoords ? [addressCoords.lat, addressCoords.lng] : undefined
       }
 
-      // Send order to API
       const response = await fetch('https://api.lyukirevizor.uz/api/orders', {
         method: 'POST',
         headers: {
@@ -150,7 +140,6 @@ export default function CheckoutPage() {
         throw new Error(result.error || 'Failed to create order')
       }
 
-      // Store order in localStorage for admin panel
       const orders = JSON.parse(localStorage.getItem("orders") || "[]")
       const newOrder = {
         id: result.orderId,
@@ -165,7 +154,6 @@ export default function CheckoutPage() {
       setIsSubmitting(false)
       setIsSuccess(true)
 
-      // Clear current order
       localStorage.removeItem("currentOrder")
 
     } catch (error) {
@@ -186,7 +174,7 @@ export default function CheckoutPage() {
 
   if (isSuccess) {
     return (
-      <main className="container mx-auto px-4 py-12">
+      <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <Card className="mx-auto max-w-2xl">
           <CardContent className="pt-12 text-center">
             <div className="mb-6 flex justify-center">
@@ -212,14 +200,12 @@ export default function CheckoutPage() {
 
   return (
     <main className="min-h-screen bg-background pt-4 sm:pt-8">
-      <div className="container mx-auto px-2 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12 max-w-6xl">
-        {/* Header */}
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
         <div className="mb-6 sm:mb-8 lg:mb-10">
           <h1 className="mb-2 text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight">{t("checkout.title")}</h1>
           <p className="text-sm sm:text-base text-muted-foreground">{t("checkout.subtitle")}</p>
         </div>
 
-        {/* Mobile Order Summary - Show first on mobile */}
         <div className="mb-6 lg:hidden max-w-sm mx-auto">
           <Card className="">
             <CardHeader className="pb-3">
@@ -256,12 +242,12 @@ export default function CheckoutPage() {
             </CardContent>
           </Card>
         </div>
+      </div>
 
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid gap-6 lg:gap-8 lg:grid-cols-3">
-          {/* Order Form */}
           <div className="lg:col-span-2 max-w-sm sm:max-w-md lg:max-w-none mx-auto lg:mx-0">
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Contact Information */}
               <Card className="">
                 <CardHeader className="sm:px-6">
                   <CardTitle className="text-base sm:text-lg leading-tight">{t("checkout.contact")}</CardTitle>
@@ -311,7 +297,6 @@ export default function CheckoutPage() {
                 </CardContent>
               </Card>
 
-              {/* Address Information */}
               <Card className="">
                 <CardHeader className="sm:px-6">
                   <CardTitle className="text-base sm:text-lg leading-tight">{t("checkout.address")}</CardTitle>
@@ -368,7 +353,6 @@ export default function CheckoutPage() {
             </form>
           </div>
 
-          {/* Desktop Order Summary */}
           <div className="hidden lg:block">
             <Card className="sticky top-18">
               <CardHeader className="pb-4">
@@ -409,5 +393,13 @@ export default function CheckoutPage() {
         </div>
       </div>
     </main>
+  )
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={<PageSkeleton variant="checkout" />}>
+      <CheckoutPageContent />
+    </Suspense>
   )
 }

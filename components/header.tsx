@@ -16,7 +16,7 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-[999999] w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4">
+      <div className="w-full max-w-7xl mx-auto flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center">
           <Image
             src="/HeaderLogo.svg"
@@ -27,7 +27,6 @@ export function Header() {
           />
         </Link>
 
-        {/* Desktop Navigation */}
         <nav className="hidden items-center gap-8 md:flex">
           <Link
             href="/#products"
@@ -55,9 +54,7 @@ export function Header() {
           </Link>
         </nav>
 
-        {/* Desktop Actions */}
         <div className="hidden items-center gap-4 md:flex">
-          {/* Language switch */}
           <Button variant="ghost" size="sm" className="border border-gray-100/50 bg-white/25 rounded-lg text-foreground hover:bg-transparent" onClick={() => setLang(lang === "ru" ? "uz" : "ru")}>{lang === "ru" ? "RU" : "UZ"}</Button>
           
           <Button onClick={() => router.push("/configurator")}>
@@ -65,9 +62,7 @@ export function Header() {
           </Button>
         </div>
 
-        {/* Mobile Menu */}
         <div className="flex items-center gap-2 md:hidden">
-          {/* Language switch */}
           <Button variant="ghost" size="sm" className="bg-transparent border-transparent text-foreground hover:bg-transparent" onClick={() => setLang(lang === "ru" ? "uz" : "ru")}>{lang === "ru" ? "RU" : "UZ"}</Button>
 
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
@@ -76,7 +71,7 @@ export function Header() {
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+            <SheetContent side="right" className="w-[280px] sm:w-[350px] max-w-[90vw]">
               <div className="mb-6">
                 <h2 className="text-lg font-semibold">{t("nav.menu")}</h2>
                 <p className="text-sm text-muted-foreground">{t("nav.menuDesc")}</p>

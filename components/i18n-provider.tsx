@@ -28,7 +28,6 @@ const ru: Messages = {
   "order.loginToOrder": "Войдите в свой аккаунт для оформления заказа",
   "order.loginAndBuy": "Войти и заказать",
 
-  // Home - Hero
   "hero.badge": "Надёжно. Эстетично. На долгие годы.",
   "hero.title1": "Скрытые решения",
   "hero.title2": "для идеального",
@@ -37,8 +36,11 @@ const ru: Messages = {
     "Инженерное совершенство для идеальной интеграции в любой интерьер. Минимальные зазоры, скрытые петли, магнитные замки.",
   "hero.configurator": "Конфигуратор",
   "hero.viewModels": "Смотреть модели",
+  "hero.hatches.paint": "Люк под покраску",
+  "hero.hatches.wall": "Люк в стене",
+  "hero.hatches.tile": "Люк в плитке",
+  "hero.hatches.floor": "Люк в полу",
 
-  // Home - Products
   "products.title": "Продукция",
   "products.subtitle": "Решения для скрытого доступа к коммуникациям любого типа",
   "products.configure": "Перейти →",
@@ -68,26 +70,26 @@ const ru: Messages = {
   "products.napolny.f2": "",
   "products.napolny.f3": "",
 
-  // Home - Statistics
   "stats.years": "дилеров по всей стране",
   "stats.installed": "проектов в работе прямо сейчас",
   "stats.clients": "завершённых проектов",
   "stats.support": "установленных люков «Revizor»",
 
-  // Home - Reviews
   "reviews.title": "Отзывы клиентов",
   "reviews.subtitle": "Более 1 000 довольных клиентов по всему Узбекистану",
   "reviews.cards.alexey.name": "Алексей М.",
   "reviews.cards.alexey.role": "Дизайнер интерьеров",
   "reviews.cards.alexey.content": "Использую люки Revizor во всех своих проектах. Качество на высшем уровне, клиенты всегда довольны.",
+  "reviews.cards.alexey.date": "15 марта 2025 г.",
   "reviews.cards.maria.name": "Мария К.",
   "reviews.cards.maria.role": "Дизайнер интерьеров",
   "reviews.cards.maria.content": "Установили модель Transformer в ванной. Действительно незаметен, зазоры минимальные. Рекомендую!",
+  "reviews.cards.maria.date": "8 апреля 2025 г.",
   "reviews.cards.dmitry.name": "Дмитрий П.",
   "reviews.cards.dmitry.role": "Дизайнер интерьеров",
   "reviews.cards.dmitry.content": "Использую люки Revizor во всех своих проектах. Качество на высшем уровне, клиенты всегда довольны.",
+  "reviews.cards.dmitry.date": "22 мая 2025 г.",
 
-  // About page
   "about.hero.title": "О компании Revizor",
   "about.hero.subtitle": "Мы создаем премиальные невидимые ревизионные люки для идеальной интеграции в интерьер — с минимальными зазорами, скрытыми петлями и надежными замками.",
   "about.hero.valuesBtn": "Наши ценности",
@@ -128,7 +130,6 @@ const ru: Messages = {
   "about.mission.title": "Наша миссия",
   "about.mission.text": "Создавать инженерные решения, которые незаметно работают на комфорт, эстетику и порядок в каждом пространстве.",
 
-  // Footer
   "footer.products": "Продукция",
   "footer.company": "Продукция",
   "footer.contacts": "Контакты",
@@ -137,7 +138,6 @@ const ru: Messages = {
   "footer.copyright": "© 2025 Revizor. Все права защищены.",
   "footer.address": "г. Ташкент, Бектемирский район, рынок \"Куйлюк\", магазин 36-А",
 
-  // FAQ
   "faq.title": "Частые вопросы",
   "faq.subtitle": "Ответы на самые популярные вопросы о наших люках",
   "faq.q1.q": "Какой размер люка мне нужен?",
@@ -198,7 +198,6 @@ const ru: Messages = {
   "cfg.products.napolny.name": "Напольный люк",
   "cfg.products.napolny.desc": "прочная сталь, армированный ЦВЛ, ключ из нержавеющей стали",
   
-  // Product detail keys for configurator
   "cfg.product.transformer.title": "Люк под покраску",
   "cfg.product.transformer.description": "Премиальное решение для скрытого доступа к инженерным коммуникациям.",
   "cfg.product.transformer.details": "Каркас выполнен из прочного анодированного алюминиевого профиля, устойчивого к коррозии и влаге. Внутренняя панель облицована влагостойким гипсокартоном, что обеспечивает долговечность и устойчивость к повышенной влажности.",
@@ -286,7 +285,6 @@ const ru: Messages = {
   "checkout.payment.transfer": "Банковский перевод",
   "checkout.payment.transferDesc": "Перевод на банковский счет",
 
-  // Address Map
   "map.searchPlaceholder": "Начните вводить адрес...",
   "map.pickAddress": "Выберите адрес доставки",
   "map.startTyping": "Начните вводить адрес в поле поиска выше",
@@ -333,7 +331,6 @@ const uz: Messages = {
   "order.loginToOrder": "Buyurtma berish uchun profilingizga kiring",
   "order.loginAndBuy": "Kirish va buyurtma berish",
 
-  // Home - Hero
   "hero.badge": "Ishonchli. Estetik. Uzoq yillar davomida.",
   "hero.title1": "Yashirin yechimlar",
   "hero.title2": "ideal uchun",
@@ -342,8 +339,11 @@ const uz: Messages = {
     "Har qanday interyerga mukammal integratsiya uchun muhandislik yechimi. Minimal tirqishlar, yashirin ilgaklar, magnit qulflar.",
   "hero.configurator": "Konfigurator",
   "hero.viewModels": "Modellarni ko'rish",
+  "hero.hatches.paint": "Bo'yoq ostidagi lyuk ",
+  "hero.hatches.wall": "Devor lyuki",
+  "hero.hatches.tile": "Plitka ostidagi lyuk",
+  "hero.hatches.floor": "Pol lyuki",
 
-  // Home - Products
   "products.title": "Mahsulotlar",
   "products.subtitle": "Har qanday turdagi kommunikatsiyalarga yashirin kirish uchun yechimlar",
   "products.configure": "O'tish →",
@@ -373,26 +373,26 @@ const uz: Messages = {
   "products.napolny.f2": "",
   "products.napolny.f3": "",
 
-  // Home - Statistics
   "stats.years": "butun mamlakat bo'ylab dilerlar",
   "stats.installed": "hozirda ishlab turgan loyihalar",
   "stats.clients": "tugatilgan loyihalar",
   "stats.support": "o'rnatilgan «Revizor» lyuklari",
 
-  // Home - Reviews
   "reviews.title": "Mijozlar fikri",
   "reviews.subtitle": "Butun O'zbekistonda 1 000 dan ortiq mamnun mijozlar",
   "reviews.cards.alexey.name": "Aleksey M.",
   "reviews.cards.alexey.role": "Interyer dizayneri",
   "reviews.cards.alexey.content": "Loyihalarimning barchasida Revizor lyuklaridan foydalanaman. Sifat yuqori, mijozlar har doim mamnun.",
+  "reviews.cards.alexey.date": "15 mart 2025 y.",
   "reviews.cards.maria.name": "Mariya K.",
   "reviews.cards.maria.role": "Interyer dizayneri",
   "reviews.cards.maria.content": "Hammomga Transformer modelini o'rnatdik. Haqiqatan ham ko'rinmaydi, tirqishlar minimal. Tavsiya qilaman!",
+  "reviews.cards.maria.date": "8 aprel 2025 y.",
   "reviews.cards.dmitry.name": "Dmitriy P.",
   "reviews.cards.dmitry.role": "Interyer dizayneri",
   "reviews.cards.dmitry.content": "Loyihalarimning barchasida Revizor lyuklaridan foydalanaman. Sifat yuqori, mijozlar har doim mamnun.",
+  "reviews.cards.dmitry.date": "22 may 2025 y.",
 
-  // About page
   "about.hero.title": "Revizor kompaniyasi haqida",
   "about.hero.subtitle": "Interyorga ideal moslashadigan ko'rinmas premium revizion lyuklarni yaratamiz — minimal tirqishlar, yashirin ilmoqlar va ishonchli qulflar bilan.",
   "about.hero.valuesBtn": "Qadriyatlarimiz",
@@ -433,7 +433,6 @@ const uz: Messages = {
   "about.mission.title": "Missiyamiz",
   "about.mission.text": "Har bir makonda qulaylik, estetika va tartib uchun ko'rinmas ishlaydigan muhandislik yechimlarini yaratish.",
 
-  // Footer
   "footer.products": "Mahsulotlar",
   "footer.company": "Mahsulotlar",
   "footer.contacts": "Kontaktlar",
@@ -442,7 +441,6 @@ const uz: Messages = {
   "footer.copyright": "© 2025 Revizor. Barcha huquqlar himoyalangan.",
   "footer.address": "Toshkent shahri, Bektemir tumani, \"Qo'yliq\" bozori, 36-A do'kon",
 
-  // FAQ
   "faq.title": "Ko‘p beriladigan savollar",
   "faq.subtitle": "Lyuklarimiz haqidagi eng mashhur savollarga javoblar",
   "faq.q1.q": "Qaysi o‘lchamdagi lyuk kerak?",
@@ -503,7 +501,6 @@ const uz: Messages = {
   "cfg.products.napolny.name": "Pol lyuki",
   "cfg.products.napolny.desc": "mustahkam po'lat, mustahkamlangan TsVL, zanglamaydigan po'latdan kalit",
   
-  // Product detail keys for configurator
   "cfg.product.transformer.title": "Bo'yoq ostidagi lyuk",
   "cfg.product.transformer.description": "Muhandislik kommunikatsiyalariga yashirin kirish uchun premium yechim.",
   "cfg.product.transformer.details": "Ramka korroziya va namlikka chidamli mustahkam anodlangan alyuminiy profildan yasalgan. Ichki panel namlikka chidamli gipsokarton bilan qoplangan.",
@@ -520,7 +517,7 @@ const uz: Messages = {
   "cfg.product.napolny.description": "Intensiv foydalanish uchun yuqori mustahkamlikka ega pol lyuki.",
   "cfg.product.napolny.details": "Kuchaytirilgan konstruksiya yuqori yuklamalarni bardosh beradi va podval xonalariga ishonchli kirishni ta'minlaydi.",
   "cfg.modelSelection": "Lyuk modeli",
-  "cfg.transformer": "Transformator",
+  "cfg.transformer": "Transformer",
   "cfg.transformerDesc": "Bo'yoq ostida",
   "cfg.anodos": "Anodos",
   "cfg.anodosDesc": "Anodlangan",
@@ -592,7 +589,6 @@ const uz: Messages = {
   "checkout.payment.transfer": "Bank o'tkazmasi",
   "checkout.payment.transferDesc": "Bank hisobiga o'tkazma",
 
-  // Address Map
   "map.searchPlaceholder": "Manzilni yozishni boshlang...",
   "map.pickAddress": "Yetkazib berish manzilini tanlang",
   "map.startTyping": "Qidiruv maydonida manzilni yozishni boshlang",

@@ -3,9 +3,6 @@ import { NextRequest, NextResponse } from 'next/server'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    
-    
-    // Validate required fields
     const requiredFields = ['fio', 'phone', 'productType', 'size', 'quantity', 'totalPrice', 'paymentType', 'location']
     const missingFields = requiredFields.filter(field => !body[field])
     
@@ -15,8 +12,6 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
-
-    // Validate phone number format (no spaces)
     const phoneRegex = /^\+998[0-9]{9}$/
     if (!phoneRegex.test(body.phone)) {
       return NextResponse.json(
@@ -24,8 +19,6 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
-
-    // Validate email format if provided
     if (body.email) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
       if (!emailRegex.test(body.email)) {
@@ -35,12 +28,10 @@ export async function POST(request: NextRequest) {
         )
       }
     }
-
-    // Validate payment type (accept localized names)
     const validPaymentTypes = [
-      'cash', 'card', 'transfer', // English
-      'Наличными', 'Банковской картой', 'Банковский перевод', // Russian
-      'Naqd pul', 'Bank kartasi', 'Bank o\'tkazmasi' // Uzbek
+      'cash', 'card', 'transfer',
+      'Наличными', 'Банковской картой', 'Банковский перевод',
+      'Naqd pul', 'Bank kartasi', 'Bank o\'tkazmasi'
     ]
     if (body.paymentType && !validPaymentTypes.includes(body.paymentType)) {
       return NextResponse.json(
@@ -48,8 +39,6 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
-
-    // Create order object
     const order = {
       id: `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       fio: body.fio,
