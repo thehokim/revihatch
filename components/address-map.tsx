@@ -45,6 +45,7 @@ export function AddressMap({ onAddressSelect, initialAddress }: AddressMapProps)
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstanceRef = useRef<any>(null)
   const markerRef = useRef<any>(null)
+  const resizeObserverRef = useRef<ResizeObserver | null>(null)
 
   const createCustomMarker = (address: string) => {
     return window.L.divIcon({
@@ -104,16 +105,41 @@ export function AddressMap({ onAddressSelect, initialAddress }: AddressMapProps)
       mapInstanceRef.current = map
 
       // Ensure proper sizing on first render (especially on mobile)
-      setTimeout(() => {
+      const invalidateSafely = () => {
         try { map.invalidateSize(); } catch {}
-      }, 0)
+      }
+      // run a few times to handle mobile layout/keyboard/transition jank
+      requestAnimationFrame(invalidateSafely)
+      setTimeout(invalidateSafely, 0)
+      setTimeout(invalidateSafely, 250)
+      setTimeout(invalidateSafely, 600)
 
       // Handle orientation and resize changes on mobile
       const handleResize = () => {
-        try { map.invalidateSize(); } catch {}
+        invalidateSafely()
+      }
+      // Explicitly listen to breakpoint crossing at 768/769px
+      const mql = window.matchMedia('(max-width: 768px)')
+      const handleBreakpoint = () => {
+        invalidateSafely()
+        setTimeout(invalidateSafely, 50)
+        setTimeout(invalidateSafely, 250)
+      }
+      try { mql.addEventListener ? mql.addEventListener('change', handleBreakpoint) : mql.addListener(handleBreakpoint) } catch {}
+      const handleVisibility = () => {
+        if (document.visibilityState === 'visible') {
+          invalidateSafely()
+        }
       }
       window.addEventListener('resize', handleResize)
       window.addEventListener('orientationchange', handleResize)
+      document.addEventListener('visibilitychange', handleVisibility)
+
+      // Observe container size changes (e.g., breakpoint crossing)
+      if (mapRef.current) {
+        resizeObserverRef.current = new ResizeObserver(() => invalidateSafely())
+        try { resizeObserverRef.current.observe(mapRef.current) } catch {}
+      }
 
       map.on('click', (e: any) => {
         const coords = e.latlng
@@ -165,12 +191,24 @@ export function AddressMap({ onAddressSelect, initialAddress }: AddressMapProps)
       return () => {
         window.removeEventListener('resize', handleResize)
         window.removeEventListener('orientationchange', handleResize)
+        document.removeEventListener('visibilitychange', handleVisibility)
+        try { mql.removeEventListener ? mql.removeEventListener('change', handleBreakpoint) : mql.removeListener(handleBreakpoint) } catch {}
+        if (resizeObserverRef.current && mapRef.current) {
+          try { resizeObserverRef.current.unobserve(mapRef.current) } catch {}
+          resizeObserverRef.current.disconnect()
+          resizeObserverRef.current = null
+        }
       }
     }
 
     // If map already exists and we just toggled visibility, invalidate size
     if (mapLoaded && showMap && mapInstanceRef.current) {
-      try { mapInstanceRef.current.invalidateSize(); } catch {}
+      try {
+        const map = mapInstanceRef.current
+        map.invalidateSize()
+        setTimeout(() => { try { map.invalidateSize() } catch {} }, 50)
+        setTimeout(() => { try { map.invalidateSize() } catch {} }, 250)
+      } catch {}
     }
   }, [mapLoaded, showMap])
 
@@ -323,7 +361,7 @@ export function AddressMap({ onAddressSelect, initialAddress }: AddressMapProps)
           </div>
           <div 
             ref={mapRef}
-            className="w-full h-80 sm:h-96 rounded-xl border-2 border-border overflow-hidden"
+            className="w-full h-80 sm:h-96 rounded-xl border-2 border-border overflow-hidden address-map-container"
             style={{ minHeight: '320px' }}
           />
           {!mapLoaded && (

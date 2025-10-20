@@ -169,8 +169,18 @@
     }
     
     /* Жесткие правила для предотвращения горизонтального overflow на мобильных */
-    * {
+    *:not(.leaflet-container):not(.leaflet-container *):not(.address-map-container):not(.address-map-container *) {
       max-width: 100vw;
+    }
+
+    /* ВАЖНО: не ограничиваем внутренние элементы Leaflet по ширине,
+       иначе тайлы становятся серыми/не отрисовываются на мобильных */
+    .leaflet-container *,
+    .leaflet-container img,
+    .leaflet-container .leaflet-tile,
+    .leaflet-container .leaflet-image-layer {
+      max-width: none !important;
+      overflow: visible !important;
     }
     
     /* Исключения для элементов, которые должны быть шире экрана */
@@ -188,9 +198,32 @@
     header,
     footer,
     nav,
-    div {
+    div:not(.address-map-container):not(.leaflet-container) {
       max-width: 100vw;
       overflow-x: hidden;
+    }
+
+    /* Исключения для Leaflet: панелям нужно свободное переполнение и без ограничений ширины */
+    .leaflet-container,
+    .leaflet-container div,
+    .leaflet-container .leaflet-pane,
+    .leaflet-container .leaflet-map-pane,
+    .leaflet-container .leaflet-tile-pane,
+    .leaflet-container .leaflet-objects-pane,
+    .leaflet-container .leaflet-overlay-pane,
+    .leaflet-container .leaflet-marker-pane,
+    .leaflet-container .leaflet-shadow-pane,
+    .leaflet-container .leaflet-tooltip-pane,
+    .leaflet-container .leaflet-popup-pane {
+      max-width: none !important;
+      overflow: visible !important;
+    }
+
+    /* Гарантируем, что контейнер карты и все его потомки не ограничены */
+    .address-map-container,
+    .address-map-container * {
+      max-width: none !important;
+      overflow: visible !important;
     }
     
     /* Flex контейнеры */
@@ -305,6 +338,20 @@
     div.sticky.configurator-sticky.top-16 {
       top: -2rem !important;
     }
+  }
+}
+
+/* Покрываем граничный случай ровно на 769px ширины */
+@media (max-width: 769px) {
+  .leaflet-container *,
+  .leaflet-container img,
+  .leaflet-container .leaflet-tile,
+  .leaflet-container .leaflet-image-layer,
+  .leaflet-container .leaflet-pane,
+  .leaflet-container .leaflet-map-pane,
+  .leaflet-container .leaflet-tile-pane {
+    max-width: none !important;
+    overflow: visible !important;
   }
 }
 
