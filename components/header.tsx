@@ -8,14 +8,39 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { useI18n } from "@/components/i18n-provider"
+import { useProducts } from "@/hooks/use-products"
+import { SupportedLanguage } from "@/lib/types"
 
 export function Header() {
   const { t, lang, setLang } = useI18n()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const router = useRouter()
+  
+  // Get current language and products
+  const currentLanguage = lang === 'uz' ? 'uz' : 'ru' as SupportedLanguage
+  const { products, getProductByCategory } = useProducts(currentLanguage)
+
+  // Function to handle order button click
+  const handleOrderClick = () => {
+    // Try to get the first available product from transformer category (most common)
+    const transformerProduct = getProductByCategory('transformer')
+    if (transformerProduct) {
+      router.push(`/configurator?id=${transformerProduct._id}`)
+      return
+    }
+    
+    // Fallback to first available product
+    if (products.length > 0) {
+      router.push(`/configurator?id=${products[0]._id}`)
+      return
+    }
+    
+    // Last fallback to products page
+    router.push('/#products')
+  }
 
   return (
-    <header className="sticky top-0 z-[999999] w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-20 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="w-full max-w-7xl mx-auto flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center">
           <Image
@@ -57,7 +82,7 @@ export function Header() {
         <div className="hidden items-center gap-4 md:flex">
           <Button variant="ghost" size="sm" className="border border-gray-100/50 bg-white/25 rounded-lg text-foreground hover:bg-transparent" onClick={() => setLang(lang === "ru" ? "uz" : "ru")}>{lang === "ru" ? "RU" : "UZ"}</Button>
           
-          <Button onClick={() => router.push("/configurator")}>
+          <Button onClick={handleOrderClick}>
             {t("action.order")}
           </Button>
         </div>
@@ -109,7 +134,7 @@ export function Header() {
                   <Button
                     className="w-full"
                     onClick={() => {
-                      router.push("/configurator")
+                      handleOrderClick()
                       setIsMobileMenuOpen(false)
                     }}
                   >

@@ -95,13 +95,25 @@ export function AddressMap({ onAddressSelect, initialAddress }: AddressMapProps)
     if (mapLoaded && showMap && mapRef.current && !mapInstanceRef.current) {
       const map = window.L.map(mapRef.current).setView([41.2995, 69.2401], 12)
 
-      window.L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-        attribution: '© OpenStreetMap contributors © CARTO',
-        subdomains: 'abcd',
-        maxZoom: 20
+      window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19,
+        crossOrigin: true
       }).addTo(map)
 
       mapInstanceRef.current = map
+
+      // Ensure proper sizing on first render (especially on mobile)
+      setTimeout(() => {
+        try { map.invalidateSize(); } catch {}
+      }, 0)
+
+      // Handle orientation and resize changes on mobile
+      const handleResize = () => {
+        try { map.invalidateSize(); } catch {}
+      }
+      window.addEventListener('resize', handleResize)
+      window.addEventListener('orientationchange', handleResize)
 
       map.on('click', (e: any) => {
         const coords = e.latlng
@@ -149,6 +161,16 @@ export function AddressMap({ onAddressSelect, initialAddress }: AddressMapProps)
               .openPopup()
           })
       })
+      // Cleanup listeners if component unmounts
+      return () => {
+        window.removeEventListener('resize', handleResize)
+        window.removeEventListener('orientationchange', handleResize)
+      }
+    }
+
+    // If map already exists and we just toggled visibility, invalidate size
+    if (mapLoaded && showMap && mapInstanceRef.current) {
+      try { mapInstanceRef.current.invalidateSize(); } catch {}
     }
   }, [mapLoaded, showMap])
 

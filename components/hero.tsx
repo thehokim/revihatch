@@ -7,25 +7,39 @@ import Image from "next/image"
 import { useI18n } from "@/components/i18n-provider"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { useProducts } from "@/hooks/use-products"
+import { SupportedLanguage } from "@/lib/types"
 
 export function Hero() {
-  const { t } = useI18n() as any
+  const { t, lang } = useI18n() as any
   const router = useRouter()
   const [hoveredHatch, setHoveredHatch] = useState<number | null>(null)
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [clickedHatch, setClickedHatch] = useState<number | null>(null)
+  
+  // Get current language and products
+  const currentLanguage = lang === 'uz' ? 'uz' : 'ru' as SupportedLanguage
+  const { products, getProductByCategory } = useProducts(currentLanguage)
 
-  const hatchModelMap: Record<number, string> = {
-    1: "transformer",
-    2: "anodos",
-    3: "anodos",
-    4: "napolny"
+  // Map hatch IDs to categories according to requirements
+  const hatchCategoryMap: Record<number, string> = {
+    1: "transformer",      // Первый сверху плюс
+    2: "anodos", // Следующие 2 плюса
+    3: "anodos", // Следующие 2 плюса
+    4: "napolny"      // Самый нижний
   }
   
   const handleHatchClick = (hatchId: number) => {
-    const model = hatchModelMap[hatchId]
-    if (model) {
-      router.push(`/configurator?model=${model}`)
+    const category = hatchCategoryMap[hatchId]
+    if (category) {
+      // Get the first product of this category
+      const product = getProductByCategory(category)
+      if (product) {
+        router.push(`/configurator?id=${product._id}`)
+      } else {
+        // Fallback to category-based URL if product not found
+        router.push(`/configurator?model=${category}`)
+      }
     }
   }
   

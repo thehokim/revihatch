@@ -91,6 +91,22 @@
 .leaflet-container {
   border-radius: 12px !important;
   overflow: hidden !important;
+  z-index: 10 !important;
+  touch-action: manipulation; /* better touch behavior on iOS */
+}
+
+/* Ensure Leaflet tile images aren't affected by global img styles (e.g. max-width: 100%) */
+.leaflet-container img,
+.leaflet-container .leaflet-tile,
+.leaflet-container .leaflet-image-layer {
+  max-width: none !important;
+}
+
+/* On some mobile browsers, hardware acceleration helps render tiles reliably */
+.leaflet-pane,
+.leaflet-map-pane,
+.leaflet-tile-pane {
+  transform: translateZ(0);
 }
 
 @media (max-width: 640px) {

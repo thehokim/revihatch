@@ -6,71 +6,67 @@ import Image from "next/image"
 import { ProductConfigurator } from "@/components/product-configurator"
 import { useI18n } from "@/components/i18n-provider"
 import { PageSkeleton } from "@/components/page-skeleton"
+import { useProducts } from "@/hooks/use-products"
+import { getDiverseImageUrl, PRODUCT_IMAGE_MAP, getLocalizedProduct } from "@/lib/api"
+import { SupportedLanguage } from "@/lib/types"
 
 function ConfiguratorContent() {
-  const { t } = useI18n() as any
+  const { t, lang } = useI18n() as any
   const searchParams = useSearchParams()
-  const modelParam = searchParams.get("model")
+  const productIdParam = searchParams.get("id")
   const [isMounted, setIsMounted] = useState(false)
+  
+  // Get current language
+  const currentLanguage = lang === 'uz' ? 'uz' : 'ru' as SupportedLanguage
+  
+  // Get product data for images and description
+  const { products, loading: productsLoading, getProductById } = useProducts(currentLanguage)
+  const product = productIdParam ? getProductById(productIdParam) : null
+  const localizedProduct = product ? getLocalizedProduct(product, currentLanguage) : null
 
   useEffect(() => {
     setIsMounted(true)
-  }, [])
-
-  const getImagesForModel = (model: string) => {
-    switch (model) {
-      case 'anodos':
-        return {
-          main: "/ano1.jpg",
-          thumbnails: ["/ano1.jpg", "/ano2.jpg", "/ano3.png"],
-          titleKey: "cfg.product.anodos.title",
-          descriptionKey: "cfg.product.anodos.description",
-          detailsKey: "cfg.product.anodos.details"
-        }
-      case 'napolny':
-        return {
-          main: "/nap3.jpg",
-          thumbnails: ["/nap1.jpg", "/nap2.jpg", "/nap3.jpg"],
-          titleKey: "cfg.product.napolny.title",
-          descriptionKey: "cfg.product.napolny.description",
-          detailsKey: "cfg.product.napolny.details"
-        }
-      case 'floor':
-        return {
-          main: "/uni1.png",
-          thumbnails: ["/uni1.png", "/uni2.png", "/uni3.png"],
-          titleKey: "cfg.product.floor.title",
-          descriptionKey: "cfg.product.floor.description",
-          detailsKey: "cfg.product.floor.details"
-        }
-      case 'universal':
-        return {
-          main: "/uni1.png",
-          thumbnails: ["/uni1.png", "/uni2.png", "/uni3.png"],
-          titleKey: "cfg.product.universal.title",
-          descriptionKey: "cfg.product.universal.description",
-          detailsKey: "cfg.product.universal.details"
-        }
-      case 'transformer':
-      default:
-        return {
-          main: "/tra3.jpg", 
-          thumbnails: ["/tra1.jpg", "/tra2.jpg", "/tra3.jpg"],
-          titleKey: "cfg.product.transformer.title",
-          descriptionKey: "cfg.product.transformer.description",
-          detailsKey: "cfg.product.transformer.details"
-        }
-    }
-  }
-
-  const images = getImagesForModel(modelParam || "transformer")
+  }, [currentLanguage])
 
   if (!isMounted) {
     return <PageSkeleton variant="configurator" />
   }
 
+  if (!productIdParam) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Неверный URL</h2>
+          <p className="text-gray-600 mb-4">Не указан ID продукта</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (productsLoading) {
+    return <PageSkeleton variant="configurator" />
+  }
+
+  if (!product) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Продукт не найден</h2>
+          <p className="text-gray-600 mb-4">Продукт с ID "{productIdParam}" не найден в API</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Get images for the product
+  const mainImage = getDiverseImageUrl(product.mainImage || product.images[0], product.category, 0)
+  const thumbnails = product.images.length > 0 
+    ? product.images.slice(0, 3).map((img, index) => getDiverseImageUrl(img, product.category, index + 1))
+    : [mainImage, mainImage, mainImage] // fallback to main image
+
   return (
     <main>
+      {/* Product Images and Description Section */}
       <section className="relative overflow-hidden bg-white py-8 sm:py-12">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,#2D2D2D_0%,#1B1B1B_100%)]">
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#FFFFFF08_0.5px,transparent_0.5px),linear-gradient(to_bottom,#FFFFFF08_0.5px,transparent_0.5px)] bg-[size:7px_7px] rotate-[71.13deg] origin-center scale-600" />
@@ -81,50 +77,54 @@ function ConfiguratorContent() {
         <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid gap-8 lg:gap-12 lg:grid-cols-2 items-center">
             <div className="relative">
-              <Image
-                src={images.main}
-                alt={t(images.titleKey)}
-                width={600}
-                height={600}
+              <img
+                src={mainImage}
+                alt={localizedProduct?.name || 'Product'}
                 className="w-full h-auto object-cover rounded-lg"
-                quality={100}
+                style={{ maxWidth: '600px', maxHeight: '600px' }}
+                crossOrigin="anonymous"
+                referrerPolicy="no-referrer"
+                onError={(e) => {
+                  console.log('Image failed to load:', mainImage)
+                  // Fallback to local image
+                  const target = e.target as HTMLImageElement
+                  target.src = PRODUCT_IMAGE_MAP[product.category] || '/placeholder.svg'
+                }}
               />
             </div>
 
             <div className="space-y-4 sm:space-y-6">
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">{t(images.titleKey)}</h2>
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">{localizedProduct?.name || 'Loading...'}</h2>
               
               <div className="space-y-4 text-gray-200 leading-relaxed">
-                <p>{t(images.descriptionKey)}</p>
-                <p>{t(images.detailsKey)}</p>
+                <p>{localizedProduct?.description || 'Loading...'}</p>
               </div>
             </div>
           </div>
 
           <div className="mt-6 sm:mt-8 flex gap-3 sm:gap-4">
-            <div className="w-24 h-24 sm:w-32 sm:h-32 bg-gray-200 rounded-lg overflow-hidden">
-              <Image
-                src={images.thumbnails[0]}
-                alt={`${t(images.titleKey)} - вид 1`}
-                width={128}
-                height={128}
-                className="w-full h-full object-cover"
-              />
-            </div>
-            
-            <div className="w-24 h-24 sm:w-32 sm:h-32 bg-gray-200 rounded-lg overflow-hidden">
-              <Image
-                src={images.thumbnails[1]}
-                alt={`${t(images.titleKey)} - вид 2`}
-                width={128}
-                height={128}
-                className="w-full h-full object-cover"
-              />
-            </div>
+            {thumbnails.map((thumbnail, index) => (
+              <div key={index} className="w-24 h-24 sm:w-32 sm:h-32 bg-gray-200 rounded-lg overflow-hidden">
+                <img
+                  src={thumbnail}
+                  alt={`${localizedProduct?.name || 'Product'} - вид ${index + 1}`}
+                  className="w-full h-full object-cover"
+                  crossOrigin="anonymous"
+                  referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    console.log('Thumbnail failed to load:', thumbnail)
+                    // Fallback to local image
+                    const target = e.target as HTMLImageElement
+                    target.src = PRODUCT_IMAGE_MAP[product.category] || '/placeholder.svg'
+                  }}
+                />
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
+      {/* Configurator Section */}
       <section className="bg-white py-8 sm:py-12">
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-6 sm:mb-8">
@@ -133,7 +133,7 @@ function ConfiguratorContent() {
           </div>
         </div>
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ProductConfigurator initialModel={modelParam || "transformer"} />
+          <ProductConfigurator productId={productIdParam} />
         </div>
       </section>
     </main>

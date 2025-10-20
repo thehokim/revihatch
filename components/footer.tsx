@@ -3,9 +3,13 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useI18n } from "@/components/i18n-provider";
+import { useProducts } from "@/hooks/use-products";
+import { SupportedLanguage, getLocalizedText } from "@/lib/types";
 
 export function Footer() {
-  const { t } = useI18n() as any;
+  const { t, lang } = useI18n() as any;
+  const currentLanguage = lang === 'uz' ? 'uz' : 'ru' as SupportedLanguage;
+  const { products, loading } = useProducts(currentLanguage);
   return (
     <footer className="relative overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,#2D2D2D_0%,#1B1B1B_100%)]">
@@ -32,38 +36,25 @@ export function Footer() {
           <div>
             <h3 className="mb-2 md:mb-4 font-bold text-white">{t("footer.products")}</h3>
             <ul className="space-y-1 md:space-y-2 text-sm text-white">
-              <li>
-                <Link
-                  href="/configurator?model=transformer"
-                  className="hover:text-gray-300"
-                >
-                  {t("products.transformer.name")}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/configurator?model=napolny"
-                  className="hover:text-gray-300"
-                >
-                  {t("products.universal.name")}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/configurator?model=anodos"
-                  className="hover:text-gray-300"
-                >
-                  {t("products.floor.name")}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/configurator?model=anodos"
-                  className="hover:text-gray-300"
-                >
-                  {t("products.anodos.name")}
-                </Link>
-              </li>
+              {loading ? (
+                <li className="text-gray-400">Загрузка...</li>
+              ) : (
+                products.map((product) => {
+                  // Получаем локализованное название продукта
+                  const localizedName = getLocalizedText(product, 'name', currentLanguage);
+                  
+                  return (
+                    <li key={product._id}>
+                      <Link
+                        href={`/configurator?model=${product.category}`}
+                        className="hover:text-gray-300"
+                      >
+                        {localizedName}
+                      </Link>
+                    </li>
+                  );
+                })
+              )}
             </ul>
           </div>
 

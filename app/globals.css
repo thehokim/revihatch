@@ -152,6 +152,160 @@
   .sticky {
     position: sticky;
   }
+  
+  /* Жесткие правила ТОЛЬКО для мобильных устройств */
+  @media (max-width: 768px) {
+    html {
+      overflow-x: hidden;
+      max-width: 100vw;
+    }
+    
+    body {
+      overflow-x: hidden;
+      max-width: 100vw;
+      margin: 0;
+      padding: 0;
+      position: relative;
+    }
+    
+    /* Жесткие правила для предотвращения горизонтального overflow на мобильных */
+    * {
+      max-width: 100vw;
+    }
+    
+    /* Исключения для элементов, которые должны быть шире экрана */
+    .overflow-x-auto,
+    .overflow-x-scroll,
+    .overflow-x-visible {
+      max-width: none;
+    }
+    
+    /* Контейнеры и основные элементы */
+    .container,
+    main,
+    section,
+    article,
+    header,
+    footer,
+    nav,
+    div {
+      max-width: 100vw;
+      overflow-x: hidden;
+    }
+    
+    /* Flex контейнеры */
+    .flex,
+    .flex-col,
+    .flex-row {
+      min-width: 0;
+      max-width: 100%;
+    }
+    
+    /* Grid контейнеры */
+    .grid {
+      max-width: 100%;
+      overflow-x: hidden;
+    }
+    
+    /* Изображения */
+    img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
+    
+    /* Кнопки и интерактивные элементы */
+    button,
+    input,
+    textarea,
+    select {
+      max-width: 100%;
+    }
+    
+    /* Sticky элементы - на мобильных тоже sticky, но с правильными отступами */
+    .sticky {
+      position: sticky;
+      max-width: 100%;
+    }
+    
+    /* Специальные правила для конфигуратора на мобильных - переопределяем Tailwind */
+    .configurator-sticky {
+      position: sticky !important;
+      top: -2rem !important;
+      max-width: 100%;
+      z-index: 20;
+    }
+    
+    /* Более специфичный селектор для переопределения Tailwind классов */
+    div.configurator-sticky.sticky {
+      top: -2rem !important;
+    }
+    
+    /* Адаптивные утилиты */
+    .mobile-safe {
+      max-width: 100vw;
+      overflow-x: hidden;
+      padding-left: max(1rem, env(safe-area-inset-left));
+      padding-right: max(1rem, env(safe-area-inset-right));
+    }
+    
+    .mobile-container {
+      width: 100%;
+      max-width: 100vw;
+      margin: 0 auto;
+      padding: 0 1rem;
+      overflow-x: hidden;
+    }
+    
+    /* Предотвращение overflow для всех возможных элементов */
+    pre,
+    code,
+    table,
+    iframe,
+    video,
+    canvas,
+    svg {
+      max-width: 100%;
+    }
+    
+    /* Убираем горизонтальные отступы на мобильных */
+    .px-4,
+    .px-6,
+    .px-8 {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+    
+    /* Обеспечиваем правильное поведение grid на мобильных */
+    .lg\\:grid-cols-2 {
+      grid-template-columns: 1fr;
+    }
+    
+    /* Header фиксированный на мобильных */
+    header {
+      position: fixed !important;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 999999;
+      width: 100%;
+    }
+    
+    /* Добавляем отступ сверху для контента под фиксированным header */
+    main {
+      margin-top: 4rem;
+    }
+    
+    /* Специальный отступ для конфигуратора - поднимаем выше (переопределяем Tailwind) */
+    .configurator-sticky {
+      top: -2rem !important;
+    }
+    
+    /* Максимально специфичный селектор для гарантированного переопределения */
+    div.sticky.configurator-sticky.top-16 {
+      top: -2rem !important;
+    }
+  }
 }
 
 @keyframes fadeIn {
