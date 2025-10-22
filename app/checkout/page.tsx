@@ -23,6 +23,7 @@ import { PaymentPicker } from "@/components/payment-picker";
 import { PageSkeleton } from "@/components/page-skeleton";
 
 interface OrderData {
+  productId?: string;
   model: string;
   modelName: string;
   width: number;
@@ -31,9 +32,14 @@ interface OrderData {
   quantity: number;
   totalPrice: number;
   isCustomSize?: boolean;
+  isCustomOrder?: boolean;
+  flaps?: number;
+  perimeter?: number;
+  selectedSize?: string;
+  productCategory?: string;
+  currency?: 'USD' | 'UZS';
 }
 
-// Success Modal Component
 function SuccessModal({
   isOpen,
   onClose,
@@ -44,7 +50,6 @@ function SuccessModal({
   const router = useRouter();
   const { t } = useI18n() as any;
 
-  // Prevent background scrolling when modal is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -52,7 +57,6 @@ function SuccessModal({
       document.body.style.overflow = 'unset';
     }
 
-    // Cleanup function to restore scrolling when component unmounts
     return () => {
       document.body.style.overflow = 'unset';
     };
@@ -127,23 +131,59 @@ function CheckoutPageContent({ onSuccess }: { onSuccess: () => void }) {
     return cleaned;
   };
 
-  const getRussianProductName = (modelName: string) => {
-    const productNames: Record<string, string> = {
-      transformer: "Люк под покраску",
-      anodos: "Люк настенный «Универсал»",
-      floor: "Напольный люк",
-      napolny: "Напольный люк",
-      universal: "Напольный люк",
+  const getLocalizedProductName = (modelName: string) => {
+    const productNames = {
+      ru: {
+        transformer: "Люк под покраску",
+        anodos: "Люк настенный «Универсал»",
+        floor: "Напольный люк",
+        napolny: "Напольный люк",
+        universal: "Напольный люк"
+      },
+      uz: {
+        transformer: "Bo'yoq ostidagi lyuk",
+        anodos: "Devor lyuki «Universal»",
+        floor: "Pol lyuki",
+        napolny: "Pol lyuki",
+        universal: "Pol lyuki"
+      }
     };
-
-    if (modelName.startsWith("cfg.products.")) {
-      const baseModel = modelName
-        .replace("cfg.products.", "")
-        .replace(".name", "");
-      return productNames[baseModel] || "Люк под покраску";
+    
+    if (orderData?.productCategory) {
+      const categoryNames = productNames[lang as keyof typeof productNames];
+      const correctName = categoryNames[orderData.productCategory as keyof typeof categoryNames];
+      if (correctName) {
+        return correctName;
+      }
+    }
+    
+    if (modelName && !modelName.startsWith("cfg.products.") && !modelName.includes(".")) {
+      const currentLangNames = productNames[lang as keyof typeof productNames];
+      const isCorrectName = Object.values(currentLangNames).includes(modelName);
+      
+      if (isCorrectName) {
+        return modelName;
+      }
     }
 
-    return productNames[modelName] || "Люк под покраску";
+    if (modelName.startsWith("cfg.products.")) {
+      const translated = t(modelName);
+      return translated;
+    }
+
+    if (modelName.includes("Напольный") || modelName.includes("Pol")) {
+      const correctName = lang === 'uz' ? 'Pol lyuki' : 'Напольный люк';
+      return correctName;
+    } else if (modelName.includes("Универсал") || modelName.includes("Universal")) {
+      const correctName = lang === 'uz' ? 'Devor lyuki «Universal»' : 'Люк настенный «Универсал»';
+      return correctName;
+    } else if (modelName.includes("покраску") || modelName.includes("Bo'yoq")) {
+      const correctName = lang === 'uz' ? 'Bo\'yoq ostidagi lyuk' : 'Люк под покраску';
+      return correctName;
+    }
+
+    const fallback = lang === 'uz' ? 'Bo\'yoq ostidagi lyuk' : 'Люк под покраску';
+    return fallback;
   };
 
   const getRussianPaymentType = (paymentType: string) => {
@@ -156,6 +196,14 @@ function CheckoutPageContent({ onSuccess }: { onSuccess: () => void }) {
     return paymentTypes[paymentType] || "Наличными";
   };
 
+  const getDisplaySize = () => {
+    if (orderData?.selectedSize) {
+      const [width, height] = orderData.selectedSize.split('x').map(Number);
+      return `${width} × ${height} ${t("cfg.units.cm")}`;
+    }
+    return `${orderData?.width} × ${orderData?.height} ${t("cfg.units.cm")}`;
+  };
+
   const [formData, setFormData] = useState({
     fio: "",
     phone: "",
@@ -166,9 +214,15 @@ function CheckoutPageContent({ onSuccess }: { onSuccess: () => void }) {
   });
 
   useEffect(() => {
-    const stored = localStorage.getItem("currentOrder");
-    if (stored) {
-      setOrderData(JSON.parse(stored));
+    const storedOrder = localStorage.getItem("currentOrder");
+    const customOrder = localStorage.getItem("customOrder");
+    
+    if (storedOrder) {
+      const parsedOrder = JSON.parse(storedOrder);
+      setOrderData(parsedOrder);
+    } else if (customOrder) {
+      const parsedCustomOrder = JSON.parse(customOrder);
+      setOrderData(parsedCustomOrder);
     } else {
       router.push("/configurator");
     }
@@ -183,10 +237,10 @@ function CheckoutPageContent({ onSuccess }: { onSuccess: () => void }) {
         fio: formData.fio,
         phone: formData.phone.replace(/\s/g, ""),
         email: formData.email || undefined,
-        productType: getRussianProductName(
+        productType: getLocalizedProductName(
           orderData?.modelName || "transformer"
         ),
-        size: `${orderData?.width} × ${orderData?.height} см`,
+        size: getDisplaySize(),
         quantity: orderData?.quantity || 1,
         totalPrice: orderData?.totalPrice || 0,
         paymentType: getRussianPaymentType(formData.paymentType),
@@ -226,6 +280,7 @@ function CheckoutPageContent({ onSuccess }: { onSuccess: () => void }) {
       onSuccess();
 
       localStorage.removeItem("currentOrder");
+      localStorage.removeItem("customOrder");
     } catch (error) {
       setIsSubmitting(false);
       alert("Ошибка при оформлении заказа. Попробуйте еще раз.");
@@ -243,7 +298,6 @@ function CheckoutPageContent({ onSuccess }: { onSuccess: () => void }) {
   };
 
   if (!orderData) {
-    // Show checkout skeleton while restoring order from localStorage
     return <PageSkeleton variant="checkout" />;
   }
 
@@ -273,7 +327,7 @@ function CheckoutPageContent({ onSuccess }: { onSuccess: () => void }) {
                     {t("checkout.model")}
                   </span>
                   <div className="font-medium text-xs">
-                    {t(orderData.modelName)}
+                    {getLocalizedProductName(orderData.modelName)}
                   </div>
                 </div>
                 <div>
@@ -281,7 +335,7 @@ function CheckoutPageContent({ onSuccess }: { onSuccess: () => void }) {
                     {t("checkout.size")}
                   </span>
                   <div className="font-medium text-xs">
-                    {orderData.width} × {orderData.height} {t("cfg.units.cm")}
+                    {getDisplaySize()}
                   </div>
                 </div>
                 <div>
@@ -294,22 +348,36 @@ function CheckoutPageContent({ onSuccess }: { onSuccess: () => void }) {
                 </div>
               </div>
               <div className="border-t pt-4">
-                <div className="flex items-baseline justify-between mb-2">
-                  <span className="text-base font-semibold">
+                <div className="mb-4">
+                  <div className="text-base font-semibold mb-2">
                     {t("cfg.summary.total")}
-                  </span>
-                  {orderData.isCustomSize ? (
-                    <span className="text-sm text-gray-600">
-                      {t("cfg.priceByPerimeter")}
-                    </span>
-                  ) : (
-                    <span className="text-xl font-bold">
-                      {new Intl.NumberFormat("ru-RU", {
-                        style: "currency",
-                        currency: "UZS",
-                        maximumFractionDigits: 0,
-                      }).format(orderData.totalPrice)}
-                    </span>
+                  </div>
+                  {orderData.isCustomOrder || orderData.isCustomSize ? (
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                      <div className="flex items-start space-x-3">
+                        <div className="flex-shrink-0">
+                          <div className="w-5 h-5 bg-gray-100 rounded-full flex items-center justify-center">
+                            <svg className="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                          </div>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm text-gray-800 mb-1">
+                            {t("cfg.priceByPerimeter")}
+                          </p>
+                          <p className="text-xs text-gray-700">
+                            {t("cfg.priceCalculationNote")}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    ) : (
+                    <div className="text-xl font-bold">
+                      {orderData.currency === 'USD'
+                        ? `${new Intl.NumberFormat('ru-RU').format(Math.round((orderData.totalPrice || 0) / 12500))} $`
+                        : `${new Intl.NumberFormat('ru-RU').format(orderData.totalPrice || 0)} UZS`}
+                    </div>
                   )}
                 </div>
                 <p className="text-xs text-muted-foreground">
@@ -488,7 +556,7 @@ function CheckoutPageContent({ onSuccess }: { onSuccess: () => void }) {
                       {t("checkout.model")}
                     </span>
                     <span className="font-medium text-right">
-                      {t(orderData.modelName)}
+                      {getLocalizedProductName(orderData.modelName)}
                     </span>
                   </div>
                   <div className="flex justify-between">
@@ -496,7 +564,7 @@ function CheckoutPageContent({ onSuccess }: { onSuccess: () => void }) {
                       {t("checkout.size")}
                     </span>
                     <span className="font-medium">
-                      {orderData.width} × {orderData.height} {t("cfg.units.cm")}
+                      {getDisplaySize()}
                     </span>
                   </div>
                   <div className="flex justify-between">
@@ -510,22 +578,36 @@ function CheckoutPageContent({ onSuccess }: { onSuccess: () => void }) {
                 </div>
 
                 <div className="border-t pt-4">
-                  <div className="mb-4 flex items-baseline justify-between">
-                    <span className="text-lg font-semibold">
+                  <div className="mb-4">
+                    <div className="text-lg font-semibold mb-3">
                       {t("cfg.summary.total")}
-                    </span>
-                    {orderData.isCustomSize ? (
-                      <span className="text-sm text-gray-600">
-                        {t("cfg.priceByPerimeter")}
-                      </span>
+                    </div>
+                    {orderData.isCustomOrder || orderData.isCustomSize ? (
+                      <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                        <div className="flex items-start space-x-3">
+                          <div className="flex-shrink-0">
+                            <div className="w-5 h-5 bg-gray-100 rounded-full flex items-center justify-center">
+                              <svg className="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                            </div>
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm text-gray-800 mb-1">
+                              {t("cfg.priceByPerimeter")}
+                            </p>
+                            <p className="text-xs text-gray-700">
+                              {t("cfg.priceCalculationNote")}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
                     ) : (
-                      <span className="text-2xl font-bold">
-                        {new Intl.NumberFormat("ru-RU", {
-                          style: "currency",
-                          currency: "UZS",
-                          maximumFractionDigits: 0,
-                        }).format(orderData.totalPrice)}
-                      </span>
+                      <div className="text-2xl font-bold">
+                        {orderData.currency === 'USD'
+                          ? `${new Intl.NumberFormat('ru-RU').format(Math.round((orderData.totalPrice || 0) / 12500))} $`
+                          : `${new Intl.NumberFormat('ru-RU').format(orderData.totalPrice || 0)} UZS`}
+                      </div>
                     )}
                   </div>
                   <p className="text-xs text-muted-foreground">

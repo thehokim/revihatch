@@ -8,34 +8,13 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { useI18n } from "@/components/i18n-provider"
-import { useProducts } from "@/hooks/use-products"
-import { SupportedLanguage } from "@/lib/types"
 
 export function Header() {
   const { t, lang, setLang } = useI18n()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const router = useRouter()
   
-  // Get current language and products
-  const currentLanguage = lang === 'uz' ? 'uz' : 'ru' as SupportedLanguage
-  const { products, getProductByCategory } = useProducts(currentLanguage)
-
-  // Function to handle order button click
   const handleOrderClick = () => {
-    // Try to get the first available product from transformer category (most common)
-    const transformerProduct = getProductByCategory('transformer')
-    if (transformerProduct) {
-      router.push(`/configurator?id=${transformerProduct._id}`)
-      return
-    }
-    
-    // Fallback to first available product
-    if (products.length > 0) {
-      router.push(`/configurator?id=${products[0]._id}`)
-      return
-    }
-    
-    // Last fallback to products page
     router.push('/#products')
   }
 
@@ -64,18 +43,6 @@ export function Header() {
             className="text-sm font-medium transition-colors hover:text-foreground text-black"
           >
             {t("nav.about")}
-          </Link>
-          <Link
-            href="/#reviews"
-            className="text-sm font-medium transition-colors hover:text-foreground text-black"
-          >
-            {t("nav.reviews")}
-          </Link>
-          <Link
-            href="/#faq"
-            className="text-sm font-medium transition-colors hover:text-foreground text-black"
-          >
-            {t("nav.faq")}
           </Link>
         </nav>
 
@@ -115,20 +82,6 @@ export function Header() {
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   {t("nav.about")}
-                </Link>
-                <Link
-                  href="/#reviews"
-                  className="text-lg font-medium text-muted-foreground transition-colors hover:text-foreground"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  {t("nav.reviews")}
-                </Link>
-                <Link
-                  href="/#faq"
-                  className="text-lg font-medium text-muted-foreground transition-colors hover:text-foreground"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  {t("nav.faq")}
                 </Link>
                 <div className="pt-4 border-t">
                   <Button

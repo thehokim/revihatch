@@ -1,7 +1,7 @@
-// API Product Types
 export interface ProductSize {
   size: string
-  coefficient: number
+  priceUSD: number
+  priceUZS: number
 }
 
 export interface CalculatedPrice {
@@ -50,19 +50,19 @@ export interface Product {
   sizes: ProductSize[]
   images: string[]
   mainImage: string | null
-  calculatedPrices: CalculatedPrice[]
+  calculatedPrices?: CalculatedPrice[]
   perimeterPricing?: PerimeterPricing[]
   createdAt: string
   updatedAt: string
 }
 
-// Local Product Types (for compatibility with existing code)
 export interface LocalProductSize {
   id: string
   label: string
   width: number
   height: number
   priceUSD: number
+  priceUZS: number
 }
 
 export interface LocalProduct {
@@ -79,14 +79,12 @@ export interface LocalProductConfig {
   image: string
 }
 
-// API Response Types
 export interface ProductsResponse {
   success: boolean
   data: Product[]
   message?: string
 }
 
-// Error Types
 export class ApiError extends Error {
   status?: number
   
@@ -97,7 +95,6 @@ export class ApiError extends Error {
   }
 }
 
-// Language utilities
 export type SupportedLanguage = 'ru' | 'uz' | 'en'
 
 export function getLocalizedText(
@@ -105,11 +102,9 @@ export function getLocalizedText(
   field: 'name' | 'description', 
   language: SupportedLanguage = 'ru'
 ): string {
-  // Handle new API format where name/description are objects
   if (field === 'name') {
     if (typeof product.name === 'object' && product.name !== null) {
       const result = product.name[language] || product.name.ru || ''
-      console.log('getLocalizedText name object:', { language, result, productName: product.name })
       return result
     }
     if (typeof product.name === 'string') {
@@ -120,7 +115,6 @@ export function getLocalizedText(
   if (field === 'description') {
     if (typeof product.description === 'object' && product.description !== null) {
       const result = product.description[language] || product.description.ru || ''
-      console.log('getLocalizedText description object:', { language, result, productDescription: product.description })
       return result
     }
     if (typeof product.description === 'string') {
@@ -128,7 +122,6 @@ export function getLocalizedText(
     }
   }
   
-  // Try to get language-specific field first (old API format)
   if (field === 'name') {
     if (language === 'ru' && product.name_ru) {
       return product.name_ru
@@ -147,12 +140,10 @@ export function getLocalizedText(
     }
   }
   
-  // Try to get translation from translations object (oldest format)
   if (product.translations?.[language]?.[field]) {
     return product.translations[language][field]!
   }
   
-  // Fallback to default field
   if (field === 'name') {
     return typeof product.name === 'string' ? product.name : `cfg.products.${product.category}.name`
   }

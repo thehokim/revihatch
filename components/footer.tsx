@@ -40,7 +40,6 @@ export function Footer() {
                 <li className="text-gray-400">Загрузка...</li>
               ) : (
                 products.map((product) => {
-                  // Получаем локализованное название продукта
                   const localizedName = getLocalizedText(product, 'name', currentLanguage);
                   
                   return (
@@ -64,16 +63,6 @@ export function Footer() {
               <li>
                 <Link href="/about" className="hover:text-gray-300">
                   {t("footer.about")}
-                </Link>
-              </li>
-              <li>
-                <Link href="/#reviews" className="hover:text-gray-300">
-                  {t("nav.reviews")}
-                </Link>
-              </li>
-              <li>
-                <Link href="/#faq" className="hover:text-gray-300">
-                  {t("nav.faq")}
                 </Link>
               </li>
             </ul>

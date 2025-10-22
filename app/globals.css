@@ -153,7 +153,6 @@
     position: sticky;
   }
   
-  /* Жесткие правила ТОЛЬКО для мобильных устройств */
   @media (max-width: 768px) {
     html {
       overflow-x: hidden;
@@ -168,13 +167,10 @@
       position: relative;
     }
     
-    /* Жесткие правила для предотвращения горизонтального overflow на мобильных */
     *:not(.leaflet-container):not(.leaflet-container *):not(.address-map-container):not(.address-map-container *) {
       max-width: 100vw;
     }
 
-    /* ВАЖНО: не ограничиваем внутренние элементы Leaflet по ширине,
-       иначе тайлы становятся серыми/не отрисовываются на мобильных */
     .leaflet-container *,
     .leaflet-container img,
     .leaflet-container .leaflet-tile,
@@ -183,14 +179,12 @@
       overflow: visible !important;
     }
     
-    /* Исключения для элементов, которые должны быть шире экрана */
     .overflow-x-auto,
     .overflow-x-scroll,
     .overflow-x-visible {
       max-width: none;
     }
     
-    /* Контейнеры и основные элементы */
     .container,
     main,
     section,
@@ -203,7 +197,6 @@
       overflow-x: hidden;
     }
 
-    /* Исключения для Leaflet: панелям нужно свободное переполнение и без ограничений ширины */
     .leaflet-container,
     .leaflet-container div,
     .leaflet-container .leaflet-pane,
@@ -219,14 +212,12 @@
       overflow: visible !important;
     }
 
-    /* Гарантируем, что контейнер карты и все его потомки не ограничены */
     .address-map-container,
     .address-map-container * {
       max-width: none !important;
       overflow: visible !important;
     }
     
-    /* Flex контейнеры */
     .flex,
     .flex-col,
     .flex-row {
@@ -234,20 +225,17 @@
       max-width: 100%;
     }
     
-    /* Grid контейнеры */
     .grid {
       max-width: 100%;
       overflow-x: hidden;
     }
     
-    /* Изображения */
     img {
       max-width: 100%;
       height: auto;
       display: block;
     }
     
-    /* Кнопки и интерактивные элементы */
     button,
     input,
     textarea,
@@ -255,13 +243,11 @@
       max-width: 100%;
     }
     
-    /* Sticky элементы - на мобильных тоже sticky, но с правильными отступами */
     .sticky {
       position: sticky;
       max-width: 100%;
     }
     
-    /* Специальные правила для конфигуратора на мобильных - переопределяем Tailwind */
     .configurator-sticky {
       position: sticky !important;
       top: -2rem !important;
@@ -269,12 +255,10 @@
       z-index: 20;
     }
     
-    /* Более специфичный селектор для переопределения Tailwind классов */
     div.configurator-sticky.sticky {
       top: -2rem !important;
     }
     
-    /* Адаптивные утилиты */
     .mobile-safe {
       max-width: 100vw;
       overflow-x: hidden;
@@ -290,7 +274,6 @@
       overflow-x: hidden;
     }
     
-    /* Предотвращение overflow для всех возможных элементов */
     pre,
     code,
     table,
@@ -301,7 +284,6 @@
       max-width: 100%;
     }
     
-    /* Убираем горизонтальные отступы на мобильных */
     .px-4,
     .px-6,
     .px-8 {
@@ -309,12 +291,10 @@
       padding-right: 1rem;
     }
     
-    /* Обеспечиваем правильное поведение grid на мобильных */
     .lg\\:grid-cols-2 {
       grid-template-columns: 1fr;
     }
     
-    /* Header фиксированный на мобильных */
     header {
       position: fixed !important;
       top: 0;
@@ -324,24 +304,20 @@
       width: 100%;
     }
     
-    /* Добавляем отступ сверху для контента под фиксированным header */
     main {
       margin-top: 4rem;
     }
     
-    /* Специальный отступ для конфигуратора - поднимаем выше (переопределяем Tailwind) */
     .configurator-sticky {
       top: -2rem !important;
     }
     
-    /* Максимально специфичный селектор для гарантированного переопределения */
     div.sticky.configurator-sticky.top-16 {
       top: -2rem !important;
     }
   }
 }
 
-/* Покрываем граничный случай ровно на 769px ширины */
 @media (max-width: 769px) {
   .leaflet-container *,
   .leaflet-container img,

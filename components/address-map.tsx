@@ -104,21 +104,17 @@ export function AddressMap({ onAddressSelect, initialAddress }: AddressMapProps)
 
       mapInstanceRef.current = map
 
-      // Ensure proper sizing on first render (especially on mobile)
       const invalidateSafely = () => {
         try { map.invalidateSize(); } catch {}
       }
-      // run a few times to handle mobile layout/keyboard/transition jank
       requestAnimationFrame(invalidateSafely)
       setTimeout(invalidateSafely, 0)
       setTimeout(invalidateSafely, 250)
       setTimeout(invalidateSafely, 600)
 
-      // Handle orientation and resize changes on mobile
       const handleResize = () => {
         invalidateSafely()
       }
-      // Explicitly listen to breakpoint crossing at 768/769px
       const mql = window.matchMedia('(max-width: 768px)')
       const handleBreakpoint = () => {
         invalidateSafely()
@@ -135,7 +131,6 @@ export function AddressMap({ onAddressSelect, initialAddress }: AddressMapProps)
       window.addEventListener('orientationchange', handleResize)
       document.addEventListener('visibilitychange', handleVisibility)
 
-      // Observe container size changes (e.g., breakpoint crossing)
       if (mapRef.current) {
         resizeObserverRef.current = new ResizeObserver(() => invalidateSafely())
         try { resizeObserverRef.current.observe(mapRef.current) } catch {}
@@ -187,7 +182,6 @@ export function AddressMap({ onAddressSelect, initialAddress }: AddressMapProps)
               .openPopup()
           })
       })
-      // Cleanup listeners if component unmounts
       return () => {
         window.removeEventListener('resize', handleResize)
         window.removeEventListener('orientationchange', handleResize)
@@ -201,7 +195,6 @@ export function AddressMap({ onAddressSelect, initialAddress }: AddressMapProps)
       }
     }
 
-    // If map already exists and we just toggled visibility, invalidate size
     if (mapLoaded && showMap && mapInstanceRef.current) {
       try {
         const map = mapInstanceRef.current

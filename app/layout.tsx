@@ -15,7 +15,7 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: "Revizor - Премиальные ревизионные люки",
+  title: "Revizor - Практично. Эстетично. Надёжно.",
   description: "Невидимые ревизионные люки премиум-класса для идеальной интеграции в интерьер",
   generator: "v0.app",
   manifest: "/manifest.json",

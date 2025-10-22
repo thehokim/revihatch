@@ -15,7 +15,6 @@ export function useProducts(language: SupportedLanguage = 'ru') {
         const fetchedProducts = await fetchProducts()
         setProducts(fetchedProducts)
       } catch (err) {
-        console.error('Failed to load products:', err)
         setError('Не удалось загрузить продукты')
       } finally {
         setLoading(false)
@@ -37,9 +36,7 @@ export function useProducts(language: SupportedLanguage = 'ru') {
         setProducts(prev => [...prev.filter(p => p.category !== category), ...categoryProducts])
         return categoryProducts[0]
       }
-    } catch (error) {
-      console.error(`Failed to load product for category ${category}:`, error)
-    }
+    } catch (error) {}
     
     return null
   }

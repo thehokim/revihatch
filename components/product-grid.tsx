@@ -20,7 +20,6 @@ export function ProductGrid() {
       const convertedProducts = apiProducts.map(product => convertApiProductToLocal(product, currentLanguage))
       setLocalProducts(convertedProducts)
     } else if (!loading && !error) {
-      // Fallback to hardcoded products if API fails
       setLocalProducts([
         {
           id: "transformer",
@@ -56,7 +55,6 @@ export function ProductGrid() {
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-8 text-center">
             <h2 className="mb-4 text-black text-center text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: 'clamp(20px, 4vw, 48px)', lineHeight: '100%', letterSpacing: '0%' }}>{t("products.title")}</h2>
-            <p className="text-lg text-black" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 400 }}>{t("products.subtitle")}</p>
           </div>
           <div className="grid grid-cols-1 md:grid-flow-col md:auto-cols-fr gap-6 sm:gap-8 items-stretch">
             {[1, 2, 3, 4].map((i) => (
@@ -73,7 +71,6 @@ export function ProductGrid() {
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8 text-center">
           <h2 className="mb-4 text-black text-center text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: 'clamp(20px, 4vw, 48px)', lineHeight: '100%', letterSpacing: '0%' }}>{t("products.title")}</h2>
-          <p className="text-lg text-black" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 400 }}>{t("products.subtitle")}</p>
           {error && (
             <div className="mt-4 p-3 bg-yellow-100 border border-yellow-400 rounded-lg text-yellow-800">
               {error}
@@ -95,8 +92,6 @@ export function ProductGrid() {
                     alt={product.name}
                     className="h-full w-full object-cover"
                     onError={(e) => {
-                      console.log('Product image failed to load:', product.image)
-                      // Fallback to placeholder
                       const target = e.target as HTMLImageElement
                       target.src = "/placeholder.svg"
                     }}

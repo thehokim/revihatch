@@ -16,10 +16,8 @@ function ConfiguratorContent() {
   const productIdParam = searchParams.get("id")
   const [isMounted, setIsMounted] = useState(false)
   
-  // Get current language
   const currentLanguage = lang === 'uz' ? 'uz' : 'ru' as SupportedLanguage
   
-  // Get product data for images and description
   const { products, loading: productsLoading, getProductById } = useProducts(currentLanguage)
   const product = productIdParam ? getProductById(productIdParam) : null
   const localizedProduct = product ? getLocalizedProduct(product, currentLanguage) : null
@@ -58,15 +56,13 @@ function ConfiguratorContent() {
     )
   }
 
-  // Get images for the product
   const mainImage = getDiverseImageUrl(product.mainImage || product.images[0], product.category, 0)
   const thumbnails = product.images.length > 0 
     ? product.images.slice(0, 3).map((img, index) => getDiverseImageUrl(img, product.category, index + 1))
-    : [mainImage, mainImage, mainImage] // fallback to main image
+    : [mainImage, mainImage, mainImage]
 
   return (
     <main>
-      {/* Product Images and Description Section */}
       <section className="relative overflow-hidden bg-white py-8 sm:py-12">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,#2D2D2D_0%,#1B1B1B_100%)]">
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#FFFFFF08_0.5px,transparent_0.5px),linear-gradient(to_bottom,#FFFFFF08_0.5px,transparent_0.5px)] bg-[size:7px_7px] rotate-[71.13deg] origin-center scale-600" />
@@ -85,8 +81,6 @@ function ConfiguratorContent() {
                 crossOrigin="anonymous"
                 referrerPolicy="no-referrer"
                 onError={(e) => {
-                  console.log('Image failed to load:', mainImage)
-                  // Fallback to local image
                   const target = e.target as HTMLImageElement
                   target.src = PRODUCT_IMAGE_MAP[product.category] || '/placeholder.svg'
                 }}
@@ -112,8 +106,6 @@ function ConfiguratorContent() {
                   crossOrigin="anonymous"
                   referrerPolicy="no-referrer"
                   onError={(e) => {
-                    console.log('Thumbnail failed to load:', thumbnail)
-                    // Fallback to local image
                     const target = e.target as HTMLImageElement
                     target.src = PRODUCT_IMAGE_MAP[product.category] || '/placeholder.svg'
                   }}
@@ -124,7 +116,6 @@ function ConfiguratorContent() {
         </div>
       </section>
 
-      {/* Configurator Section */}
       <section className="bg-white py-8 sm:py-12">
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-6 sm:mb-8">

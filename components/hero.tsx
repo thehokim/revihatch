@@ -17,27 +17,23 @@ export function Hero() {
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [clickedHatch, setClickedHatch] = useState<number | null>(null)
   
-  // Get current language and products
   const currentLanguage = lang === 'uz' ? 'uz' : 'ru' as SupportedLanguage
   const { products, getProductByCategory } = useProducts(currentLanguage)
 
-  // Map hatch IDs to categories according to requirements
   const hatchCategoryMap: Record<number, string> = {
-    1: "transformer",      // Первый сверху плюс
-    2: "anodos", // Следующие 2 плюса
-    3: "anodos", // Следующие 2 плюса
-    4: "napolny"      // Самый нижний
+    1: "transformer",
+    2: "anodos",
+    3: "anodos",
+    4: "napolny"
   }
   
   const handleHatchClick = (hatchId: number) => {
     const category = hatchCategoryMap[hatchId]
     if (category) {
-      // Get the first product of this category
       const product = getProductByCategory(category)
       if (product) {
         router.push(`/configurator?id=${product._id}`)
       } else {
-        // Fallback to category-based URL if product not found
         router.push(`/configurator?model=${category}`)
       }
     }
@@ -81,25 +77,20 @@ export function Hero() {
   ]
 
   return (
-    <section className="relative overflow-hidden min-h-[600px] sm:min-h-[700px] md:min-h-[800px] lg:min-h-[848px] justify-center items-center flex py-8 sm:py-12 md:py-16">
+    <section className="relative overflow-hidden min-h-[600px] sm:min-h-[700px] md:min-h-[800px] lg:min-h-[848px] justify-center items-center flex py-2 sm:py-4 md:py-6">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,#2D2D2D_0%,#1B1B1B_100%)]">
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#FFFFFF08_0.5px,transparent_0.5px),linear-gradient(to_bottom,#FFFFFF08_0.5px,transparent_0.5px)] bg-[size:7px_7px] rotate-[71.13deg] origin-center scale-600" />
           <div className="absolute inset-y-0 left-0 w-full bg-gradient-to-r from-[#1B1B1B] via-transparent to-transparent" />
           <div className="absolute inset-y-0 right-0 w-full bg-gradient-to-l from-[#1B1B1B] via-transparent to-transparent" />
         </div>
       <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex lg:flex-row flex-col justify-between items-center gap-8 sm:gap-10 md:gap-12">
-          <div className="space-y-4 sm:space-y-6 md:space-y-8 w-full lg:w-auto">
-            <div className="inline-block rounded-full bg-[#ffffff]/10 border border-white/50 px-3 py-1">
-              <span className="text-xs sm:text-sm font-medium text-white">{t("hero.badge")}</span>
-            </div>
+        <div className="flex flex-col lg:flex-row items-center gap-8 sm:gap-10 md:gap-12 lg:gap-16 xl:gap-20">
+          <div className="space-y-6 sm:space-y-8 md:space-y-10 w-full lg:w-auto lg:flex-1 lg:max-w-2xl">
 
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white leading-tight" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700 }}>
-              {t("hero.title1")}
-              <br />
-              {t("hero.title2")}
-              <br />
-              {t("hero.title3")}
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-[1.1] tracking-tight" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700 }}>
+              <span className="block">{t("hero.title1")}</span>
+              <span className="block">{t("hero.title2")}</span>
+              <span className="block">{t("hero.title3")}</span>
             </h1>
 
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
@@ -115,13 +106,13 @@ export function Hero() {
             </div>
           </div>
 
-          <div className="relative flex justify-center items-center w-full lg:w-auto">
-            <div className="relative w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg">
+          <div className="relative flex justify-end items-center w-full lg:w-auto lg:flex-shrink-0">
+            <div className="relative w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl">
               <Image
                 src="/Herolyuk.png"
                 alt="3D модель угла комнаты с люком"
-                width={600}
-                height={600}
+                width={1200}
+                height={1200}
                 className="w-full h-auto object-contain"
                 priority
               />
@@ -130,8 +121,8 @@ export function Hero() {
                 <Image
                   src={hatches.find(h => h.id === hoveredHatch)?.image || "/Herolyuk.png"}
                   alt="3D модель угла комнаты с люком"
-                  width={600}
-                  height={600}
+                  width={1200}
+                  height={1200}
                   className="absolute inset-0 w-full h-auto object-contain animate-fade-in image-overlay"
                 />
               )}

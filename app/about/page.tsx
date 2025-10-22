@@ -75,7 +75,7 @@ function AboutPageContent() {
             <h2 className="text-black text-center text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: 'clamp(20px, 4vw, 48px)', lineHeight: '100%', letterSpacing: '0%' }}>{t("about.advantages.title")}</h2>
           </div>
           
-          <div className="grid gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
             <div className="relative overflow-hidden rounded-[10px] border border-white/50 p-3 sm:p-4 lg:p-6 text-center max-w-[463px] h-[150px] sm:h-[180px] lg:h-[197px] flex flex-col justify-center">
               <div className="absolute inset-0">
                 <Image
@@ -107,23 +107,6 @@ function AboutPageContent() {
               <div className="relative z-10">
                 <h3 className="text-sm sm:text-base lg:text-lg font-bold text-white mb-2 sm:mb-3" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700 }}>{t("about.advantages.card2.title")}</h3>
                 <p className="text-xs sm:text-sm text-white">{t("about.advantages.card2.desc")}</p>
-              </div>
-            </div>
-            
-            <div className="relative overflow-hidden rounded-[10px] border border-white/50 p-3 sm:p-4 lg:p-6 text-center max-w-[463px] h-[150px] sm:h-[180px] lg:h-[197px] flex flex-col justify-center">
-              <div className="absolute inset-0">
-                <Image
-                  src="/lyuk3.png"
-                  alt="Люк Универсал"
-                  fill
-                  className="object-cover"
-                  quality={100}
-                />
-                <div className="absolute inset-0 bg-black/80" />
-              </div>
-              <div className="relative z-10">
-                <h3 className="text-sm sm:text-base lg:text-lg font-bold text-white mb-2 sm:mb-3" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700 }}>{t("about.advantages.card3.title")}</h3>
-                <p className="text-xs sm:text-sm text-white">{t("about.advantages.card3.desc")}</p>
               </div>
             </div>
             
@@ -177,7 +160,7 @@ function AboutPageContent() {
             <div className="relative rounded-lg overflow-hidden order-2 lg:order-1">
               <iframe
                 title={t("about.map.title")}
-                src="https://yandex.ru/map-widget/v1/?ll=69.284%2C41.233&z=18&l=map,sat&pt=69.284,41.233,pm2rdl"
+                src="https://yandex.ru/map-widget/v1/?ll=69.25%2C41.25&z=18&l=map,sat&pt=69.25,41.25,pm2rdl"
                 className="h-[300px] sm:h-[400px] lg:h-[460px] w-full"
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
