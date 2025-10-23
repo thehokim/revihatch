@@ -252,7 +252,7 @@
       position: sticky !important;
       top: -2rem !important;
       max-width: 100%;
-      z-index: 20;
+      z-index: 10;
     }
     
     div.configurator-sticky.sticky {

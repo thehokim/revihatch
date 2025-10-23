@@ -96,7 +96,7 @@ function ConfiguratorContent() {
             </div>
           </div>
 
-          <div className="mt-6 sm:mt-8 flex gap-3 sm:gap-4">
+          {/* <div className="mt-6 sm:mt-8 flex gap-3 sm:gap-4">
             {thumbnails.map((thumbnail, index) => (
               <div key={index} className="w-24 h-24 sm:w-32 sm:h-32 bg-gray-200 rounded-lg overflow-hidden">
                 <img
@@ -112,7 +112,7 @@ function ConfiguratorContent() {
                 />
               </div>
             ))}
-          </div>
+          </div> */}
         </div>
       </section>
 

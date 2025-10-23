@@ -367,120 +367,6 @@ export function ProductConfigurator({ productId }: ProductConfiguratorProps) {
   return (
     <div className="w-full">
       <div className="grid gap-8 lg:gap-16 lg:grid-cols-2">
-        <div className="sticky top-16 lg:top-24 self-start z-20 configurator-sticky">
-          <div className="bg-white rounded-xl border border-gray-100 p-4 sm:p-6 lg:p-8">
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-2xl font-bold text-black mb-2">
-                  {localizedProduct?.name || "Loading..."}
-                </h2>
-              </div>
-
-              <div className="relative z-20 bg-white rounded-lg p-4 sm:p-6 lg:p-8 flex items-center justify-center">
-                {(() => {
-                  const width = currentWidth;
-                  const height = currentHeight;
-
-                  const isSquare = width === height;
-                  const isHorizontal = width > height;
-                  const isVertical = height > width;
-
-                  const baseSize = 200;
-                  let displayWidth, displayHeight;
-
-                  if (isSquare) {
-                    displayWidth = displayHeight = baseSize;
-                  } else if (isHorizontal) {
-                    const ratio = height / width;
-                    displayWidth = baseSize;
-                    displayHeight = baseSize * ratio;
-                  } else {
-                    const ratio = width / height;
-                    displayWidth = baseSize * ratio;
-                    displayHeight = baseSize;
-                  }
-
-                  return (
-                    <div className="relative">
-                      <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-medium text-gray-600">
-                        {width} {t("cfg.units.cmShort")}
-                      </div>
-                      <div className="absolute -left-8 top-1/2 transform -translate-y-1/2 -rotate-90 text-xs font-medium text-gray-600">
-                        {height} {t("cfg.units.cmShort")}
-                      </div>
-
-                      <div
-                        className="relative border-2 border-black rounded-lg"
-                        style={{
-                          width: `${displayWidth}px`,
-                          height: `${displayHeight}px`,
-                          minWidth: "120px",
-                          minHeight: "120px",
-                          maxWidth: "280px",
-                          maxHeight: "280px",
-                        }}
-                      >
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="w-full h-px bg-gray-300"></div>
-                          <div className="absolute w-px h-full bg-gray-300"></div>
-                        </div>
-
-                        {currentFlaps === 1 && (
-                          <div className="absolute top-1/2 right-0 transform -translate-y-1/2 -translate-x-1 w-3 h-3 bg-black rounded-full"></div>
-                        )}
-
-                        {currentFlaps === 2 && (
-                          <>
-                            <div className="absolute top-1/2 left-1/2 transform -translate-y-1/2 translate-x-1 w-3 h-3 bg-black rounded-full"></div>
-                            <div className="absolute top-1/2 right-1/2 transform -translate-y-1/2 -translate-x-1 w-3 h-3 bg-black rounded-full"></div>
-                            <div className="absolute top-0 bottom-0 left-1/2 w-px bg-gray-400"></div>
-                          </>
-                        )}
-
-                        {currentFlaps === 3 && (
-                          <>
-                            <div className="absolute top-1/2 left-1/3 transform -translate-y-1/2 -translate-x-1 w-3 h-3 bg-black rounded-full"></div>
-                            <div className="absolute top-1/2 left-1/2 transform -translate-y-1/2 -translate-x-1 w-3 h-3 bg-black rounded-full"></div>
-                            <div className="absolute top-1/2 right-1/3 transform -translate-y-1/2 translate-x-1 w-3 h-3 bg-black rounded-full"></div>
-                            <div className="absolute top-0 bottom-0 left-1/3 w-px bg-gray-400"></div>
-                            <div className="absolute top-0 bottom-0 right-1/3 w-px bg-gray-400"></div>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })()}
-              </div>
-
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">{t("cfg.size")}:</span>
-                  <span className="font-medium">
-                    {currentWidth} {t("cfg.units.cm")} х {currentHeight}{" "}
-                    {t("cfg.units.cm")}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">{t("cfg.perimeter")}:</span>
-                  <span className="font-medium">
-                    {perimeter} {t("cfg.units.cm")}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">{t("cfg.flaps")}:</span>
-                  <span className="font-medium">
-                    {currentFlaps === 3
-                      ? t("cfg.doorTypes.tripleEven")
-                      : currentFlaps === 2
-                      ? t("cfg.doorTypes.doubleCenter")
-                      : t("cfg.doorTypes.singleRight")}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <div className="relative z-10 bg-white rounded-xl border border-gray-100 p-4 sm:p-6 lg:p-8 space-y-6 lg:space-y-8">
           {product?.category === "anodos" && (
             <div>
@@ -952,6 +838,120 @@ export function ProductConfigurator({ productId }: ProductConfiguratorProps) {
               <ShoppingCart className="mr-2 h-5 w-5" />
               {showCustomOrder ? t("cfg.submitOrder") : t("cfg.checkout")}
             </Button>
+          </div>
+        </div>
+
+        <div className="sticky top-16 lg:top-24 self-start z-10 configurator-sticky">
+          <div className="bg-white rounded-xl border border-gray-100 p-4 sm:p-6 lg:p-8">
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-2xl font-bold text-black mb-2">
+                  {localizedProduct?.name || "Loading..."}
+                </h2>
+              </div>
+
+              <div className="relative z-10 bg-white rounded-lg p-4 sm:p-6 lg:p-8 flex items-center justify-center">
+                {(() => {
+                  const width = currentWidth;
+                  const height = currentHeight;
+
+                  const isSquare = width === height;
+                  const isHorizontal = width > height;
+                  const isVertical = height > width;
+
+                  const baseSize = 200;
+                  let displayWidth, displayHeight;
+
+                  if (isSquare) {
+                    displayWidth = displayHeight = baseSize;
+                  } else if (isHorizontal) {
+                    const ratio = height / width;
+                    displayWidth = baseSize;
+                    displayHeight = baseSize * ratio;
+                  } else {
+                    const ratio = width / height;
+                    displayWidth = baseSize * ratio;
+                    displayHeight = baseSize;
+                  }
+
+                  return (
+                    <div className="relative">
+                      <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-medium text-gray-600">
+                        {width} {t("cfg.units.cmShort")}
+                      </div>
+                      <div className="absolute -left-8 top-1/2 transform -translate-y-1/2 -rotate-90 text-xs font-medium text-gray-600">
+                        {height} {t("cfg.units.cmShort")}
+                      </div>
+
+                      <div
+                        className="relative border-2 border-black rounded-lg"
+                        style={{
+                          width: `${displayWidth}px`,
+                          height: `${displayHeight}px`,
+                          minWidth: "120px",
+                          minHeight: "120px",
+                          maxWidth: "280px",
+                          maxHeight: "280px",
+                        }}
+                      >
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="w-full h-px bg-gray-300"></div>
+                          <div className="absolute w-px h-full bg-gray-300"></div>
+                        </div>
+
+                        {currentFlaps === 1 && (
+                          <div className="absolute top-1/2 right-0 transform -translate-y-1/2 -translate-x-1 w-3 h-3 bg-black rounded-full"></div>
+                        )}
+
+                        {currentFlaps === 2 && (
+                          <>
+                            <div className="absolute top-1/2 left-1/2 transform -translate-y-1/2 translate-x-1 w-3 h-3 bg-black rounded-full"></div>
+                            <div className="absolute top-1/2 right-1/2 transform -translate-y-1/2 -translate-x-1 w-3 h-3 bg-black rounded-full"></div>
+                            <div className="absolute top-0 bottom-0 left-1/2 w-px bg-gray-400"></div>
+                          </>
+                        )}
+
+                        {currentFlaps === 3 && (
+                          <>
+                            <div className="absolute top-1/2 left-1/3 transform -translate-y-1/2 -translate-x-1 w-3 h-3 bg-black rounded-full"></div>
+                            <div className="absolute top-1/2 left-1/2 transform -translate-y-1/2 -translate-x-1 w-3 h-3 bg-black rounded-full"></div>
+                            <div className="absolute top-1/2 right-1/3 transform -translate-y-1/2 translate-x-1 w-3 h-3 bg-black rounded-full"></div>
+                            <div className="absolute top-0 bottom-0 left-1/3 w-px bg-gray-400"></div>
+                            <div className="absolute top-0 bottom-0 right-1/3 w-px bg-gray-400"></div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">{t("cfg.size")}:</span>
+                  <span className="font-medium">
+                    {currentWidth} {t("cfg.units.cm")} х {currentHeight}{" "}
+                    {t("cfg.units.cm")}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">{t("cfg.perimeter")}:</span>
+                  <span className="font-medium">
+                    {perimeter} {t("cfg.units.cm")}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">{t("cfg.flaps")}:</span>
+                  <span className="font-medium">
+                    {currentFlaps === 3
+                      ? t("cfg.doorTypes.tripleEven")
+                      : currentFlaps === 2
+                      ? t("cfg.doorTypes.doubleCenter")
+                      : t("cfg.doorTypes.singleRight")}
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

@@ -11,7 +11,7 @@ function AboutPageContent() {
   const { t } = useI18n() as any
   return (
     <main>
-      <section className="relative overflow-hidden min-h-[600px] sm:min-h-[700px] md:min-h-[800px] lg:min-h-[848px] justify-center items-center flex py-8 sm:py-12 md:py-16">
+      <section className="relative overflow-hidden min-h-[400px] sm:min-h-[450px] md:min-h-[500px] lg:min-h-[550px] justify-center items-center flex py-6 sm:py-8 md:py-10">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,#2D2D2D_0%,#1B1B1B_100%)]">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#FFFFFF08_0.5px,transparent_0.5px),linear-gradient(to_bottom,#FFFFFF08_0.5px,transparent_0.5px)] bg-[size:7px_7px] rotate-[71.13deg] origin-center scale-600" />
         <div className="absolute inset-y-0 left-0 w-full bg-gradient-to-r from-[#1B1B1B] via-transparent to-transparent" />
@@ -19,12 +19,12 @@ function AboutPageContent() {
         </div>
 
         <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
-          <div className="mb-4 sm:mb-6 inline-block rounded-full border border-white/50 bg-white/10 px-3 py-1">
+          <div className="mb-3 sm:mb-4 inline-block rounded-full border border-white/50 bg-white/10 px-3 py-1">
             <span className="text-xs sm:text-sm font-medium text-white">{t("hero.badge")}</span>
           </div>
 
-          <h1 className="mb-4 sm:mb-6 text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700 }}>{t("about.hero.title")}</h1>
-          <p className="mx-auto mb-6 sm:mb-8 max-w-3xl text-sm sm:text-base lg:text-lg text-white leading-relaxed px-4">
+          <h1 className="mb-3 sm:mb-4 text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700 }}>{t("about.hero.title")}</h1>
+          <p className="mx-auto mb-4 sm:mb-6 max-w-3xl text-sm sm:text-base lg:text-lg text-white leading-relaxed px-4">
             {t("about.hero.subtitle")}
           </p>
 
@@ -160,7 +160,7 @@ function AboutPageContent() {
             <div className="relative rounded-lg overflow-hidden order-2 lg:order-1">
               <iframe
                 title={t("about.map.title")}
-                src="https://yandex.ru/map-widget/v1/?ll=69.25%2C41.25&z=18&l=map,sat&pt=69.25,41.25,pm2rdl"
+                src="https://yandex.ru/map-widget/v1/?ll=69.294262%2C41.255892&z=18&l=map,sat&pt=69.294262,41.255892,pm2rdl"
                 className="h-[300px] sm:h-[400px] lg:h-[460px] w-full"
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"

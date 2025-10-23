@@ -85,8 +85,8 @@ export function ProductGrid() {
               href={`/configurator?id=${product.id}`}
               className="block h-full"
             >
-              <Card className="bg-white rounded-[10px] border border-[#DFDFDF] overflow-hidden w-full h-full flex flex-col p-0">
-                <div className="aspect-[4/3] overflow-hidden">
+              <Card className="bg-white rounded-[10px] border border-[#DFDFDF] overflow-hidden w-full h-[450px] flex flex-col p-0">
+                <div className="aspect-[4/3] overflow-hidden flex-shrink-0">
                   <img
                     src={product.image || "/placeholder.svg"}
                     alt={product.name}
@@ -98,17 +98,27 @@ export function ProductGrid() {
                   />
                 </div>
 
-                <CardContent className="p-0 flex flex-col flex-1 m-0 text-center">
-                  <div className="flex-1 px-2">
-                    <CardTitle className="mb-1 text-lg font-bold text-black">
-                      {product.name}
-                    </CardTitle>
-                    <CardDescription className="text-sm text-black leading-relaxed">
-                      {product.description}
-                    </CardDescription>
+                <CardContent className="p-0 flex flex-col flex-1 m-0">
+                  <div className="flex-1 px-3 flex flex-col">
+                    <div className="h-10 flex items-center justify-center mb-2">
+                      <CardTitle className="text-lg font-bold text-black leading-tight text-center">
+                        {product.name}
+                      </CardTitle>
+                    </div>
+                    <div className="flex-1 flex items-start">
+                      <CardDescription className="text-sm text-black leading-relaxed overflow-hidden" style={{
+                        display: '-webkit-box',
+                        WebkitLineClamp: 6,
+                        WebkitBoxOrient: 'vertical',
+                        lineHeight: '1.4',
+                        maxHeight: 'calc(1.4em * 6)'
+                      }}>
+                        {product.description}
+                      </CardDescription>
+                    </div>
                   </div>
 
-                  <div className="my-2 text-center">
+                  <div className="px-3 pb-3 flex-shrink-0 text-center">
                     <Button
                       variant="ghost"
                       className="p-0 h-auto text-black hover:text-blue-700 hover:bg-transparent font-normal"
