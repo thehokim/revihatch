@@ -6,6 +6,7 @@ import { Suspense } from "react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useI18n } from "@/components/i18n-provider";
+import { useCurrency } from "@/hooks/use-currency";
 import {
   Card,
   CardContent,
@@ -89,6 +90,7 @@ function SuccessModal({
 
 function CheckoutPageContent({ onSuccess }: { onSuccess: () => void }) {
   const { t, lang } = useI18n() as any;
+  const { convertUZSToUSD } = useCurrency();
   const router = useRouter();
   const [orderData, setOrderData] = useState<OrderData | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -313,85 +315,11 @@ function CheckoutPageContent({ onSuccess }: { onSuccess: () => void }) {
           </p>
         </div>
 
-        <div className="mb-6 lg:hidden w-full max-w-md mx-auto">
-          <Card className="">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm">
-                {t("checkout.yourOrder")}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="grid grid-cols-2 gap-3 text-xs">
-                <div>
-                  <span className="text-muted-foreground text-xs block mb-1">
-                    {t("checkout.model")}
-                  </span>
-                  <div className="font-medium text-xs">
-                    {getLocalizedProductName(orderData.modelName)}
-                  </div>
-                </div>
-                <div>
-                  <span className="text-muted-foreground text-xs block mb-1">
-                    {t("checkout.size")}
-                  </span>
-                  <div className="font-medium text-xs">
-                    {getDisplaySize()}
-                  </div>
-                </div>
-                <div>
-                  <span className="text-muted-foreground text-xs block mb-1">
-                    {t("checkout.count")}
-                  </span>
-                  <div className="font-medium text-xs">
-                    {orderData.quantity} {t("cfg.pcs")}
-                  </div>
-                </div>
-              </div>
-              <div className="border-t pt-4">
-                <div className="mb-4">
-                  <div className="text-base font-semibold mb-2">
-                    {t("cfg.summary.total")}
-                  </div>
-                  {orderData.isCustomOrder || orderData.isCustomSize ? (
-                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
-                      <div className="flex items-start space-x-3">
-                        <div className="flex-shrink-0">
-                          <div className="w-5 h-5 bg-gray-100 rounded-full flex items-center justify-center">
-                            <svg className="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                          </div>
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm text-gray-800 mb-1">
-                            {t("cfg.priceByPerimeter")}
-                          </p>
-                          <p className="text-xs text-gray-700">
-                            {t("cfg.priceCalculationNote")}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    ) : (
-                    <div className="text-xl font-bold">
-                      {orderData.currency === 'USD'
-                        ? `${new Intl.NumberFormat('ru-RU').format(Math.round((orderData.totalPrice || 0) / 12500))} $`
-                        : `${new Intl.NumberFormat('ru-RU').format(orderData.totalPrice || 0)} UZS`}
-                    </div>
-                  )}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {t("checkout.notice")}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
       </div>
 
       <div className="w-full max-w-7xl pb-4 sm:pb-6 mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid gap-4 sm:gap-6 lg:gap-8 lg:grid-cols-3">
-          <div className="lg:col-span-2 w-full">
+        <div className="grid gap-4 sm:gap-6 lg:gap-8">
+          <div className="w-full">
             <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
               <Card className="">
                 <CardHeader className="px-4 sm:px-6">
@@ -542,81 +470,6 @@ function CheckoutPageContent({ onSuccess }: { onSuccess: () => void }) {
             </form>
           </div>
 
-          <div className="hidden lg:block">
-            <Card className="sticky top-18">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-lg">
-                  {t("checkout.yourOrder")}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">
-                      {t("checkout.model")}
-                    </span>
-                    <span className="font-medium text-right">
-                      {getLocalizedProductName(orderData.modelName)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">
-                      {t("checkout.size")}
-                    </span>
-                    <span className="font-medium">
-                      {getDisplaySize()}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">
-                      {t("checkout.count")}
-                    </span>
-                    <span className="font-medium">
-                      {orderData.quantity} {t("cfg.pcs")}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="border-t pt-4">
-                  <div className="mb-4">
-                    <div className="text-lg font-semibold mb-3">
-                      {t("cfg.summary.total")}
-                    </div>
-                    {orderData.isCustomOrder || orderData.isCustomSize ? (
-                      <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
-                        <div className="flex items-start space-x-3">
-                          <div className="flex-shrink-0">
-                            <div className="w-5 h-5 bg-gray-100 rounded-full flex items-center justify-center">
-                              <svg className="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                              </svg>
-                            </div>
-                          </div>
-                          <div className="flex-1">
-                            <p className="text-sm text-gray-800 mb-1">
-                              {t("cfg.priceByPerimeter")}
-                            </p>
-                            <p className="text-xs text-gray-700">
-                              {t("cfg.priceCalculationNote")}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="text-2xl font-bold">
-                        {orderData.currency === 'USD'
-                          ? `${new Intl.NumberFormat('ru-RU').format(Math.round((orderData.totalPrice || 0) / 12500))} $`
-                          : `${new Intl.NumberFormat('ru-RU').format(orderData.totalPrice || 0)} UZS`}
-                      </div>
-                    )}
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    {t("checkout.notice")}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
         </div>
       </div>
     </main>

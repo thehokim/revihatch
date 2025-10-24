@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Minus, Plus, ShoppingCart } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -14,6 +12,17 @@ import {
 } from "@/lib/api";
 import { LocalProductSize, SupportedLanguage } from "@/lib/types";
 import { useProducts } from "@/hooks/use-products";
+import { useCurrency } from "@/hooks/use-currency";
+import { 
+  getSpecialPricingForProduct, 
+  getSpecialPricingInfo, 
+  getAllowedFlaps, 
+  isSpecialProduct 
+} from "./special-pricing";
+import { PriceDisplay } from "./price-display";
+import { ReadySizes } from "./ready-sizes";
+import { CustomOrderForm } from "./custom-order-form";
+import { InstallationTypeSelector } from "./installation-type-selector";
 
 interface ProductConfiguratorProps {
   productId: string;
@@ -29,14 +38,15 @@ export function ProductConfigurator({ productId }: ProductConfiguratorProps) {
     getProductById,
   } = useProducts(currentLanguage);
 
-  // Get the specific product by ID
+  const { convertUSDToUZS, rate: currencyRate, loading: currencyLoading } = useCurrency();
+
   const product = getProductById(productId);
 
   const getInitialSize = (product: any) => {
     if (product && product.sizes.length > 0) {
       return product.sizes[0].size;
     }
-    return "20x20"; // fallback
+    return "20x20";
   };
 
   const getInitialDimensions = (product: any) => {
@@ -45,7 +55,7 @@ export function ProductConfigurator({ productId }: ProductConfiguratorProps) {
       const [width, height] = firstSize.split("x").map(Number);
       return { width, height };
     }
-    return { width: 20, height: 20 }; // fallback
+    return { width: 20, height: 20 };
   };
 
   const initialDimensions = product
@@ -54,8 +64,8 @@ export function ProductConfigurator({ productId }: ProductConfiguratorProps) {
   const [selectedSize, setSelectedSize] = useState(
     product ? getInitialSize(product) : "20x20"
   );
-  const [customWidth, setCustomWidth] = useState(initialDimensions.width); // in cm
-  const [customHeight, setCustomHeight] = useState(initialDimensions.height); // in cm
+  const [customWidth, setCustomWidth] = useState(initialDimensions.width);
+  const [customHeight, setCustomHeight] = useState(initialDimensions.height);
   const [quantity, setQuantity] = useState(1);
   const [useCustomSize, setUseCustomSize] = useState(false);
   const [usePerimeterPricing, setUsePerimeterPricing] = useState(false);
@@ -70,6 +80,13 @@ export function ProductConfigurator({ productId }: ProductConfiguratorProps) {
     flaps: 1,
   });
   const [currency, setCurrency] = useState<"USD" | "UZS">("UZS");
+
+  // Force UZS currency for special product
+  useEffect(() => {
+    if (isSpecialProduct(productId)) {
+      setCurrency("UZS");
+    }
+  }, [productId]);
 
   const getCurrentProduct = () => {
     if (product) {
@@ -107,8 +124,76 @@ export function ProductConfigurator({ productId }: ProductConfiguratorProps) {
     (p: any) => p.maxPerimeter.toString() === selectedPerimeter
   );
 
+  const currentFlaps = useMemo(() => {
+    if (showCustomOrder) {
+      return customOrderData.flaps;
+    } else if (isTripleDoor) {
+      return 3;
+    } else if (isDoubleDoor) {
+      return 2;
+    } else {
+      return 1;
+    }
+  }, [showCustomOrder, customOrderData.flaps, isTripleDoor, isDoubleDoor]);
+
+  const currentWidth = useMemo(() => {
+    if (showCustomOrder) {
+      const width = Number(customOrderData.width);
+      return Number.isFinite(width) && width > 0 ? width : 20;
+    } else if (useCustomSize) {
+      return Number.isFinite(customWidth as unknown as number)
+        ? (customWidth as unknown as number)
+        : 0;
+    } else if (usePerimeterPricing && selectedPerimeterData) {
+      return selectedPerimeterData.exampleWidth;
+    } else if (selectedSizeData) {
+      return selectedSizeData.width;
+    }
+    return 30;
+  }, [
+    showCustomOrder,
+    customOrderData.width,
+    useCustomSize,
+    customWidth,
+    usePerimeterPricing,
+    selectedPerimeterData,
+    selectedSizeData,
+  ]);
+
+  const currentHeight = useMemo(() => {
+    if (showCustomOrder) {
+      const height = Number(customOrderData.height);
+      return Number.isFinite(height) && height > 0 ? height : 20;
+    } else if (useCustomSize) {
+      return Number.isFinite(customHeight as unknown as number)
+        ? (customHeight as unknown as number)
+        : 0;
+    } else if (usePerimeterPricing && selectedPerimeterData) {
+      return selectedPerimeterData.exampleHeight;
+    } else if (selectedSizeData) {
+      return selectedSizeData.height;
+    }
+    return 20;
+  }, [
+    showCustomOrder,
+    customOrderData.height,
+    useCustomSize,
+    customHeight,
+    usePerimeterPricing,
+    selectedPerimeterData,
+    selectedSizeData,
+  ]);
+
   const totalPrice = useMemo(() => {
     if (showCustomOrder) {
+      // Calculate price for custom order
+      if (isSpecialProduct(productId)) {
+        const perimeter = (currentWidth + currentHeight) * 2;
+        const specialPrice = getSpecialPricingForProduct(productId, perimeter, currentFlaps, isCeilingInstallation);
+        if (specialPrice !== null) {
+          return convertUSDToUZS(specialPrice) * quantity;
+        }
+      }
       return 0;
     }
 
@@ -121,7 +206,19 @@ export function ProductConfigurator({ productId }: ProductConfiguratorProps) {
       ? (customHeight as unknown as number)
       : 0;
 
-    if (
+    // Special pricing for special products - only for custom orders
+    if (isSpecialProduct(productId) && (useCustomSize || showCustomOrder)) {
+      // Use current dimensions for calculation
+      const perimeter = (currentWidth + currentHeight) * 2;
+      const flaps = currentFlaps;
+      
+      const specialPrice = getSpecialPricingForProduct(productId, perimeter, flaps, isCeilingInstallation);
+      if (specialPrice !== null) {
+        priceUSD = specialPrice;
+      } else {
+        return 0;
+      }
+    } else if (
       usePerimeterPricing &&
       selectedPerimeterData &&
       selectedPerimeterData.priceUSD
@@ -186,23 +283,33 @@ export function ProductConfigurator({ productId }: ProductConfiguratorProps) {
         }
       }
     } else if (selectedSizeData && selectedSizeData.priceUSD) {
-      if (product) {
-        const apiPrice = getPriceForSize(product, selectedSizeData.id);
-        priceUSD = apiPrice || selectedSizeData.priceUSD;
-      } else {
-        priceUSD = selectedSizeData.priceUSD;
-      }
+      // For custom orders, use priceUSD and convert dynamically
+      priceUSD = selectedSizeData.priceUSD;
 
       if (product?.category === "anodos" && isCeilingInstallation) {
         priceUSD = priceUSD + 3;
       }
     }
 
-    const priceUZS = Math.round(priceUSD * 12500);
+    // For ready sizes, return priceUZS directly without conversion
+    if (selectedSizeData && !useCustomSize && !usePerimeterPricing && !showCustomOrder) {
+      let finalPriceUZS = selectedSizeData.priceUZS;
+      
+      // Add ceiling installation surcharge if applicable
+      if (product?.category === "anodos" && isCeilingInstallation) {
+        finalPriceUZS = finalPriceUZS + (3 * 12500); // Convert $3 to UZS using fallback rate
+      }
+      
+      return finalPriceUZS * quantity;
+    }
+
+    // For custom orders and other cases, use dynamic conversion
+    const priceUZS = convertUSDToUZS(priceUSD);
     return priceUZS * quantity;
   }, [
     showCustomOrder,
     product,
+    productId,
     selectedSize,
     customWidth,
     customHeight,
@@ -215,71 +322,15 @@ export function ProductConfigurator({ productId }: ProductConfiguratorProps) {
     selectedSizeData,
     selectedPerimeterData,
     currentPerimeterPricing,
-  ]);
-
-  const currentWidth = useMemo(() => {
-    if (showCustomOrder) {
-      const width = Number(customOrderData.width);
-      return Number.isFinite(width) && width > 0 ? width : 20;
-    } else if (useCustomSize) {
-      return Number.isFinite(customWidth as unknown as number)
-        ? (customWidth as unknown as number)
-        : 0;
-    } else if (usePerimeterPricing && selectedPerimeterData) {
-      return selectedPerimeterData.exampleWidth;
-    } else if (selectedSizeData) {
-      return selectedSizeData.width;
-    }
-    return 30;
-  }, [
-    showCustomOrder,
-    customOrderData.width,
-    useCustomSize,
-    customWidth,
-    usePerimeterPricing,
-    selectedPerimeterData,
-    selectedSizeData,
-  ]);
-
-  const currentHeight = useMemo(() => {
-    if (showCustomOrder) {
-      const height = Number(customOrderData.height);
-      return Number.isFinite(height) && height > 0 ? height : 20;
-    } else if (useCustomSize) {
-      return Number.isFinite(customHeight as unknown as number)
-        ? (customHeight as unknown as number)
-        : 0;
-    } else if (usePerimeterPricing && selectedPerimeterData) {
-      return selectedPerimeterData.exampleHeight;
-    } else if (selectedSizeData) {
-      return selectedSizeData.height;
-    }
-    return 20;
-  }, [
-    showCustomOrder,
-    customOrderData.height,
-    useCustomSize,
-    customHeight,
-    usePerimeterPricing,
-    selectedPerimeterData,
-    selectedSizeData,
+    currentFlaps,
+    currentWidth,
+    currentHeight,
+    convertUSDToUZS,
   ]);
 
   const perimeter = useMemo(() => {
     return (currentWidth + currentHeight) * 2;
   }, [currentWidth, currentHeight]);
-
-  const currentFlaps = useMemo(() => {
-    if (showCustomOrder) {
-      return customOrderData.flaps;
-    } else if (isTripleDoor) {
-      return 3;
-    } else if (isDoubleDoor) {
-      return 2;
-    } else {
-      return 1;
-    }
-  }, [showCustomOrder, customOrderData.flaps, isTripleDoor, isDoubleDoor]);
 
   const handleAddToCart = () => {
     if (!product) return;
@@ -318,17 +369,29 @@ export function ProductConfigurator({ productId }: ProductConfiguratorProps) {
       return;
     }
 
+    const perimeter = (width + height) * 2;
+    const allowedFlaps = getAllowedFlaps(productId, perimeter);
+
+    // Calculate the actual price for custom order
+    let calculatedPrice = 0;
+    if (isSpecialProduct(productId)) {
+      const specialPrice = getSpecialPricingForProduct(productId, perimeter, customOrderData.flaps, isCeilingInstallation);
+      if (specialPrice !== null) {
+        calculatedPrice = convertUSDToUZS(specialPrice) * quantity;
+      }
+    }
+
     const orderData = {
       productId: productId,
       modelName: localizedProduct?.name || product?.name || "Unknown Product",
       width: width,
       height: height,
       quantity: quantity,
-      totalPrice: 0,
+      totalPrice: calculatedPrice,
       isCustomSize: true,
       isCustomOrder: true,
       flaps: customOrderData.flaps,
-      perimeter: (width + height) * 2,
+      perimeter: perimeter,
       productCategory: product.category,
       currency: currency,
     };
@@ -368,303 +431,51 @@ export function ProductConfigurator({ productId }: ProductConfiguratorProps) {
     <div className="w-full">
       <div className="grid gap-8 lg:gap-16 lg:grid-cols-2">
         <div className="relative z-10 bg-white rounded-xl border border-gray-100 p-4 sm:p-6 lg:p-8 space-y-6 lg:space-y-8">
-          {product?.category === "anodos" && (
-            <div>
-              <h3 className="text-lg font-bold text-black mb-4">
-                {t("cfg.installationType")}
-              </h3>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <button
-                  onClick={() => setIsCeilingInstallation(false)}
-                  className={`p-3 border-2 rounded-lg text-center transition-colors flex-1 ${
-                    !isCeilingInstallation
-                      ? "bg-white border-gray-600"
-                      : "bg-white border-gray-300 hover:bg-gray-50"
-                  }`}
-                >
-                  <div className="font-medium text-black">
-                    {t("cfg.wallMount")}
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    {t("cfg.basePrice")}
-                  </div>
-                </button>
-                <button
-                  onClick={() => setIsCeilingInstallation(true)}
-                  className={`p-3 border-2 rounded-lg text-center transition-colors flex-1 ${
-                    isCeilingInstallation
-                      ? "bg-white border-gray-600"
-                      : "bg-white border-gray-300 hover:bg-gray-50"
-                  }`}
-                >
-                  <div className="font-medium text-black">
-                    {t("cfg.ceilingMount")}
-                  </div>
-                  <div className="text-sm text-gray-600">(+3 $)</div>
-                </button>
-              </div>
-            </div>
-          )}
-
-          <div>
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-bold text-black">
-                {showCustomOrder
-                  ? t("cfg.customOrderTitle")
-                  : t("cfg.readySizes")}
-              </h3>
-              {!showCustomOrder && (
-                <div className="flex items-center bg-gray-100 rounded-lg p-1">
-                  <button
-                    onClick={() => setCurrency("USD")}
-                    className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
-                      currency === "USD"
-                        ? "bg-white text-gray-900 shadow-sm"
-                        : "text-gray-600 hover:text-gray-900"
-                    }`}
-                  >
-                    $
-                  </button>
-                  <button
-                    onClick={() => setCurrency("UZS")}
-                    className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
-                      currency === "UZS"
-                        ? "bg-white text-gray-900 shadow-sm"
-                        : "text-gray-600 hover:text-gray-900"
-                    }`}
-                  >
-                    UZS
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {!showCustomOrder ? (
-              <>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {currentSizes.map((size) => (
-                    <button
-                      key={size.id}
-                      onClick={() => {
+          <ReadySizes
+            currentSizes={currentSizes}
+            selectedSize={selectedSize}
+            useCustomSize={useCustomSize}
+            usePerimeterPricing={usePerimeterPricing}
+            showCustomOrder={showCustomOrder}
+            productId={productId}
+            onSizeSelect={(size) => {
                         setSelectedSize(size.id);
                         setUseCustomSize(false);
                         setUsePerimeterPricing(false);
                         setCustomWidth(size.width);
                         setCustomHeight(size.height);
+              
+              // Close custom order form if it's open
+              setShowCustomOrder(false);
+              
                         const sizePerimeter = (size.width + size.height) * 2;
-                        if (sizePerimeter > 200) {
-                          setIsDoubleDoor(true);
+                        
+              // Special logic for special products
+              if (isSpecialProduct(productId)) {
+                const allowedFlaps = getAllowedFlaps(productId, sizePerimeter);
+                          if (allowedFlaps.length > 0) {
+                            // Set to first allowed option
+                            if (allowedFlaps.includes(1)) {
+                              setIsDoubleDoor(false);
+                              setIsTripleDoor(false);
+                            } else if (allowedFlaps.includes(2)) {
+                              setIsDoubleDoor(true);
+                              setIsTripleDoor(false);
+                            } else if (allowedFlaps.includes(3)) {
+                              setIsDoubleDoor(false);
+                              setIsTripleDoor(true);
+                            }
+                          }
                         } else {
-                          setIsDoubleDoor(false);
+                          // Original logic for other products
+                          if (sizePerimeter > 200) {
+                            setIsDoubleDoor(true);
+                          } else {
+                            setIsDoubleDoor(false);
+                          }
                         }
                       }}
-                      className={`p-3 border-2 rounded-lg text-center transition-colors ${
-                        selectedSize === size.id &&
-                        !useCustomSize &&
-                        !usePerimeterPricing
-                          ? "bg-white border-gray-600"
-                          : "bg-white border-gray-300 hover:bg-gray-50"
-                      }`}
-                    >
-                      <div className="font-medium text-black">{size.label}</div>
-                      <div className="text-sm text-gray-600">
-                        (
-                        {currency === "USD"
-                          ? `${size.priceUSD || 0} $`
-                          : `${new Intl.NumberFormat("ru-RU").format(
-                              size.priceUZS || 0
-                            )} UZS`}
-                        )
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </>
-            ) : (
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label
-                      htmlFor="custom-width"
-                      className="text-sm font-medium text-gray-700"
-                    >
-                      {t("cfg.widthLabel")}
-                    </Label>
-                    <div className="relative mt-1">
-                      <Input
-                        id="custom-width"
-                        type="number"
-                        min="20"
-                        max="200"
-                        value={customOrderData.width}
-                        onChange={(e) =>
-                          setCustomOrderData((prev) => ({
-                            ...prev,
-                            width: e.target.value,
-                          }))
-                        }
-                        className="pr-8 border-gray-300"
-                      />
-                      <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs text-gray-500">
-                        {t("cfg.units.cm")}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label
-                      htmlFor="custom-height"
-                      className="text-sm font-medium text-gray-700"
-                    >
-                      {t("cfg.heightLabel")}
-                    </Label>
-                    <div className="relative mt-1">
-                      <Input
-                        id="custom-height"
-                        type="number"
-                        min="20"
-                        max="200"
-                        value={customOrderData.height}
-                        onChange={(e) =>
-                          setCustomOrderData((prev) => ({
-                            ...prev,
-                            height: e.target.value,
-                          }))
-                        }
-                        className="pr-8 border-gray-300"
-                      />
-                      <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs text-gray-500">
-                        {t("cfg.units.cm")}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <Label className="text-sm font-medium text-gray-700 mb-3 block">
-                    {t("cfg.flaps")}
-                  </Label>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <label className="relative cursor-pointer group">
-                      <input
-                        type="radio"
-                        name="flaps"
-                        value={1}
-                        checked={customOrderData.flaps === 1}
-                        onChange={(e) =>
-                          setCustomOrderData((prev) => ({
-                            ...prev,
-                            flaps: Number(e.target.value),
-                          }))
-                        }
-                        className="sr-only"
-                      />
-                      <div
-                        className={`p-3 border-2 rounded-lg text-center transition-all duration-200 h-20 flex flex-col justify-center space-y-1 ${
-                          customOrderData.flaps === 1
-                            ? "bg-white border-gray-600 shadow-sm"
-                            : "bg-white border-gray-300 hover:border-gray-400 hover:shadow-sm"
-                        }`}
-                      >
-                        <div className="text-sm font-medium text-gray-900">
-                          1
-                        </div>
-                        <div className="text-xs text-gray-600">
-                          {t("cfg.doorTypes.singleRight")}
-                        </div>
-                      </div>
-                    </label>
-
-                    <label className="relative cursor-pointer group">
-                      <input
-                        type="radio"
-                        name="flaps"
-                        value={2}
-                        checked={customOrderData.flaps === 2}
-                        onChange={(e) =>
-                          setCustomOrderData((prev) => ({
-                            ...prev,
-                            flaps: Number(e.target.value),
-                          }))
-                        }
-                        className="sr-only"
-                      />
-                      <div
-                        className={`p-3 border-2 rounded-lg text-center transition-all duration-200 h-20 flex flex-col justify-center space-y-1 ${
-                          customOrderData.flaps === 2
-                            ? "bg-white border-gray-600 shadow-sm"
-                            : "bg-white border-gray-300 hover:border-gray-400 hover:shadow-sm"
-                        }`}
-                      >
-                        <div className="text-sm font-medium text-gray-900">
-                          2
-                        </div>
-                        <div className="text-xs text-gray-600">
-                          {t("cfg.doorTypes.doubleCenter")}
-                        </div>
-                      </div>
-                    </label>
-
-                    <label className="relative cursor-pointer group">
-                      <input
-                        type="radio"
-                        name="flaps"
-                        value={3}
-                        checked={customOrderData.flaps === 3}
-                        onChange={(e) =>
-                          setCustomOrderData((prev) => ({
-                            ...prev,
-                            flaps: Number(e.target.value),
-                          }))
-                        }
-                        className="sr-only"
-                      />
-                      <div
-                        className={`p-3 border-2 rounded-lg text-center transition-all duration-200 h-20 flex flex-col justify-center space-y-1 ${
-                          customOrderData.flaps === 3
-                            ? "bg-white border-gray-600 shadow-sm"
-                            : "bg-white border-gray-300 hover:border-gray-400 hover:shadow-sm"
-                        }`}
-                      >
-                        <div className="text-sm font-medium text-gray-900">
-                          3
-                        </div>
-                        <div className="text-xs text-gray-600">
-                          {t("cfg.doorTypes.tripleEven")}
-                        </div>
-                      </div>
-                    </label>
-                  </div>
-                </div>
-
-                <div className="bg-gray-50 rounded-lg p-3">
-                  <div className="text-sm text-gray-600">
-                    <div className="flex justify-between">
-                      <span>{t("cfg.size")}:</span>
-                      <span className="font-medium">
-                        {customOrderData.width} × {customOrderData.height}{" "}
-                        {t("cfg.units.cm")}
-                      </span>
-                    </div>
-                    <div className="flex justify-between mt-1">
-                      <span>{t("cfg.perimeter")}:</span>
-                      <span className="font-medium">
-                        {(() => {
-                          const width = Number(customOrderData.width);
-                          const height = Number(customOrderData.height);
-                          return Number.isFinite(width) &&
-                            Number.isFinite(height)
-                            ? (width + height) * 2
-                            : 0;
-                        })()}{" "}
-                        {t("cfg.units.cm")}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
+          />
 
           {selectedPerimeterData?.hasDoubleDoorOption &&
             product?.category === "transformer" && (
@@ -714,10 +525,18 @@ export function ProductConfigurator({ productId }: ProductConfiguratorProps) {
           <div className="mb-6">
             <Button
               variant="outline"
-              onClick={() => setShowCustomOrder(!showCustomOrder)}
+              onClick={() => {
+                if (!showCustomOrder) {
+                  // Reset ready size selection when opening custom order
+                  setSelectedSize("");
+                  setUseCustomSize(false);
+                  setUsePerimeterPricing(false);
+                }
+                setShowCustomOrder(!showCustomOrder);
+              }}
               className="w-full border-gray-300 hover:bg-gray-50 text-gray-700 py-3"
             >
-              {showCustomOrder ? t("cfg.readySizes") : t("cfg.customOrder")}
+              {showCustomOrder ? t("cfg.closeCustomOrder") : t("cfg.customOrder")}
             </Button>
           </div>
 
@@ -755,85 +574,20 @@ export function ProductConfigurator({ productId }: ProductConfiguratorProps) {
             <h3 className="text-lg font-bold text-black mb-4">
               {t("cfg.total")}
             </h3>
-            {showCustomOrder ? (
-              <div className="mb-6">
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
-                  <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0">
-                      <div className="w-5 h-5 bg-gray-100 rounded-full flex items-center justify-center">
-                        <svg
-                          className="w-3 h-3 text-gray-600"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                          />
-                        </svg>
-                      </div>
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="text-sm font-semibold text-gray-900 mb-1">
-                        {t("cfg.customCalculation")}
-                      </h4>
-                      <p className="text-sm text-gray-800 mb-1">
-                        {t("cfg.priceByPerimeter")}
-                      </p>
-                      <p className="text-xs text-gray-700">
-                        {t("cfg.priceCalculationNote")}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ) : useCustomSize ? (
-              <div className="mb-6">
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
-                  <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0">
-                      <div className="w-5 h-5 bg-gray-100 rounded-full flex items-center justify-center">
-                        <svg
-                          className="w-3 h-3 text-gray-600"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                          />
-                        </svg>
-                      </div>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm text-gray-800">
-                        {t("cfg.priceByPerimeter")}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="text-3xl font-bold text-black mb-6">
-                {currency === "USD"
-                  ? `${new Intl.NumberFormat("ru-RU").format(
-                      Math.round(totalPrice / 12500)
-                    )} $`
-                  : `${new Intl.NumberFormat("ru-RU").format(totalPrice)} UZS`}
-              </div>
-            )}
+            <PriceDisplay
+              showCustomOrder={showCustomOrder}
+              useCustomSize={useCustomSize}
+              productId={productId}
+              currentWidth={currentWidth}
+              currentHeight={currentHeight}
+              currentFlaps={currentFlaps}
+              totalPrice={totalPrice}
+              pricingInfo={(showCustomOrder || useCustomSize) ? getSpecialPricingInfo(productId, (currentWidth + currentHeight) * 2, currentFlaps, isCeilingInstallation) : undefined}
+            />
 
             <Button
               className="w-full bg-red-600 hover:bg-red-700 text-white py-3 text-lg font-medium rounded-lg"
-              onClick={
-                showCustomOrder ? handleCustomOrderSubmit : handleAddToCart
-              }
+              onClick={showCustomOrder ? handleCustomOrderSubmit : handleAddToCart}
             >
               <ShoppingCart className="mr-2 h-5 w-5" />
               {showCustomOrder ? t("cfg.submitOrder") : t("cfg.checkout")}
@@ -841,119 +595,17 @@ export function ProductConfigurator({ productId }: ProductConfiguratorProps) {
           </div>
         </div>
 
-        <div className="sticky top-16 lg:top-24 self-start z-10 configurator-sticky">
-          <div className="bg-white rounded-xl border border-gray-100 p-4 sm:p-6 lg:p-8">
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-2xl font-bold text-black mb-2">
-                  {localizedProduct?.name || "Loading..."}
-                </h2>
-              </div>
+        {showCustomOrder && (
+          <CustomOrderForm
+            productId={productId}
+            customOrderData={customOrderData}
+            onDataChange={setCustomOrderData}
+            onClose={() => setShowCustomOrder(false)}
+            isCeilingInstallation={isCeilingInstallation}
+            onInstallationTypeChange={setIsCeilingInstallation}
+          />
+            )}
 
-              <div className="relative z-10 bg-white rounded-lg p-4 sm:p-6 lg:p-8 flex items-center justify-center">
-                {(() => {
-                  const width = currentWidth;
-                  const height = currentHeight;
-
-                  const isSquare = width === height;
-                  const isHorizontal = width > height;
-                  const isVertical = height > width;
-
-                  const baseSize = 200;
-                  let displayWidth, displayHeight;
-
-                  if (isSquare) {
-                    displayWidth = displayHeight = baseSize;
-                  } else if (isHorizontal) {
-                    const ratio = height / width;
-                    displayWidth = baseSize;
-                    displayHeight = baseSize * ratio;
-                  } else {
-                    const ratio = width / height;
-                    displayWidth = baseSize * ratio;
-                    displayHeight = baseSize;
-                  }
-
-                  return (
-                    <div className="relative">
-                      <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-medium text-gray-600">
-                        {width} {t("cfg.units.cmShort")}
-                      </div>
-                      <div className="absolute -left-8 top-1/2 transform -translate-y-1/2 -rotate-90 text-xs font-medium text-gray-600">
-                        {height} {t("cfg.units.cmShort")}
-                      </div>
-
-                      <div
-                        className="relative border-2 border-black rounded-lg"
-                        style={{
-                          width: `${displayWidth}px`,
-                          height: `${displayHeight}px`,
-                          minWidth: "120px",
-                          minHeight: "120px",
-                          maxWidth: "280px",
-                          maxHeight: "280px",
-                        }}
-                      >
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="w-full h-px bg-gray-300"></div>
-                          <div className="absolute w-px h-full bg-gray-300"></div>
-                        </div>
-
-                        {currentFlaps === 1 && (
-                          <div className="absolute top-1/2 right-0 transform -translate-y-1/2 -translate-x-1 w-3 h-3 bg-black rounded-full"></div>
-                        )}
-
-                        {currentFlaps === 2 && (
-                          <>
-                            <div className="absolute top-1/2 left-1/2 transform -translate-y-1/2 translate-x-1 w-3 h-3 bg-black rounded-full"></div>
-                            <div className="absolute top-1/2 right-1/2 transform -translate-y-1/2 -translate-x-1 w-3 h-3 bg-black rounded-full"></div>
-                            <div className="absolute top-0 bottom-0 left-1/2 w-px bg-gray-400"></div>
-                          </>
-                        )}
-
-                        {currentFlaps === 3 && (
-                          <>
-                            <div className="absolute top-1/2 left-1/3 transform -translate-y-1/2 -translate-x-1 w-3 h-3 bg-black rounded-full"></div>
-                            <div className="absolute top-1/2 left-1/2 transform -translate-y-1/2 -translate-x-1 w-3 h-3 bg-black rounded-full"></div>
-                            <div className="absolute top-1/2 right-1/3 transform -translate-y-1/2 translate-x-1 w-3 h-3 bg-black rounded-full"></div>
-                            <div className="absolute top-0 bottom-0 left-1/3 w-px bg-gray-400"></div>
-                            <div className="absolute top-0 bottom-0 right-1/3 w-px bg-gray-400"></div>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })()}
-              </div>
-
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">{t("cfg.size")}:</span>
-                  <span className="font-medium">
-                    {currentWidth} {t("cfg.units.cm")} х {currentHeight}{" "}
-                    {t("cfg.units.cm")}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">{t("cfg.perimeter")}:</span>
-                  <span className="font-medium">
-                    {perimeter} {t("cfg.units.cm")}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">{t("cfg.flaps")}:</span>
-                  <span className="font-medium">
-                    {currentFlaps === 3
-                      ? t("cfg.doorTypes.tripleEven")
-                      : currentFlaps === 2
-                      ? t("cfg.doorTypes.doubleCenter")
-                      : t("cfg.doorTypes.singleRight")}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );
