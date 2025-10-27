@@ -109,11 +109,8 @@ export function PriceDisplay({
                   <p className="text-sm text-gray-800 mb-1">
                     {t("cfg.perimeterUpTo").replace("{perimeter}", perimeter.toString()).replace("{maxPerimeter}", pricingInfo.rule.maxPerimeter.toString())}
                   </p>
-                  <p className="text-lg font-bold text-gray-900">
+                  <p className="text-2xl font-bold text-gray-900">
                     {new Intl.NumberFormat("ru-RU").format(priceUZS)} UZS
-                  </p>
-                  <p className="text-xs text-gray-700">
-                    ({pricingInfo.priceUSD} USD)
                   </p>
                 </div>
               </div>
@@ -192,9 +189,6 @@ export function PriceDisplay({
                 </p>
                 <p className="text-lg font-bold text-gray-900">
                   {new Intl.NumberFormat("ru-RU").format(priceUZS)} UZS
-                </p>
-                <p className="text-xs text-gray-700">
-                  ({pricingInfo.priceUSD} USD)
                 </p>
               </div>
             </div>
