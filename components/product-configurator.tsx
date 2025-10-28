@@ -17,7 +17,8 @@ import {
   getSpecialPricingForProduct, 
   getSpecialPricingInfo, 
   getAllowedFlaps, 
-  isSpecialProduct 
+  isSpecialProduct,
+  getMaxPerimeterForProduct
 } from "./special-pricing";
 import { PriceDisplay } from "./price-display";
 import { ReadySizes } from "./ready-sizes";
@@ -26,6 +27,11 @@ import { InstallationTypeSelector } from "./installation-type-selector";
 
 interface ProductConfiguratorProps {
   productId: string;
+}
+
+interface SelectedSizeWithQuantity {
+  size: LocalProductSize;
+  quantity: number;
 }
 
 export function ProductConfigurator({ productId }: ProductConfiguratorProps) {
@@ -55,7 +61,7 @@ export function ProductConfigurator({ productId }: ProductConfiguratorProps) {
       const [width, height] = firstSize.split("x").map(Number);
       return { width, height };
     }
-    return { width: 20, height: 20 };
+    return { width: 15, height: 15 };
   };
 
   const initialDimensions = product
@@ -75,11 +81,16 @@ export function ProductConfigurator({ productId }: ProductConfiguratorProps) {
   const [isTripleDoor, setIsTripleDoor] = useState(false);
   const [showCustomOrder, setShowCustomOrder] = useState(false);
   const [customOrderData, setCustomOrderData] = useState({
-    width: "20",
-    height: "20",
+    width: "15",
+    height: "15",
     flaps: 1,
+    quantity: 1,
   });
   const [currency, setCurrency] = useState<"USD" | "UZS">("UZS");
+  const [selectedSizesWithQuantity, setSelectedSizesWithQuantity] = useState<SelectedSizeWithQuantity[]>([]);
+  const [customOrderPrice, setCustomOrderPrice] = useState(0);
+  const [hasCustomOrder, setHasCustomOrder] = useState(false);
+  const [customOrderExceedsLimit, setCustomOrderExceedsLimit] = useState(false);
 
   // Force UZS currency for special product
   useEffect(() => {
@@ -332,6 +343,30 @@ export function ProductConfigurator({ productId }: ProductConfiguratorProps) {
     return (currentWidth + currentHeight) * 2;
   }, [currentWidth, currentHeight]);
 
+  const handleQuantityChange = (sizeId: string, quantity: number) => {
+    setSelectedSizesWithQuantity(prev => {
+      const allSizes = getSizesForProduct(product);
+      if (quantity === 0) {
+        // Remove item if quantity is 0
+        return prev.filter(item => item.size.id !== sizeId);
+      } else {
+        // Update or add item
+        const existing = prev.find(item => item.size.id === sizeId);
+        if (existing) {
+          return prev.map(item => 
+            item.size.id === sizeId ? { ...item, quantity } : item
+          );
+        } else {
+          const size = allSizes.find(s => s.id === sizeId);
+          if (size) {
+            return [...prev, { size, quantity }];
+          }
+          return prev;
+        }
+      }
+    });
+  };
+
   const handleAddToCart = () => {
     if (!product) return;
 
@@ -365,12 +400,12 @@ export function ProductConfigurator({ productId }: ProductConfiguratorProps) {
       width <= 0 ||
       height <= 0
     ) {
-      alert("Пожалуйста, введите корректные размеры");
+      alert(t("cfg.invalidDimensions"));
       return;
     }
 
     const perimeter = (width + height) * 2;
-    const allowedFlaps = getAllowedFlaps(productId, perimeter);
+    const allowedFlaps = getAllowedFlaps(productId, perimeter, width, height);
 
     // Calculate the actual price for custom order
     let calculatedPrice = 0;
@@ -405,7 +440,7 @@ export function ProductConfigurator({ productId }: ProductConfiguratorProps) {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-4 text-lg">Загрузка продукта...</p>
+          <p className="mt-4 text-lg">{t("cfg.loading")}</p>
         </div>
       </div>
     );
@@ -416,21 +451,23 @@ export function ProductConfigurator({ productId }: ProductConfiguratorProps) {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            Продукт не найден
+            {t("cfg.productNotFound")}
           </h2>
           <p className="text-gray-600 mb-4">
-            Продукт с ID "{productId}" не найден в API
+            {t("cfg.productNotFoundDesc").replace("{productId}", productId)}
           </p>
-          <Button onClick={() => router.push("/")}>Вернуться на главную</Button>
+          <Button onClick={() => router.push("/")}>{t("cfg.goBack")}</Button>
         </div>
       </div>
     );
   }
 
+  const hasRightColumnContent = showCustomOrder || selectedSizesWithQuantity.length > 0;
+
   return (
     <div className="w-full">
-      <div className="grid gap-8 lg:gap-16 lg:grid-cols-2">
-        <div className="relative z-10 bg-white rounded-xl border border-gray-100 p-4 sm:p-6 lg:p-8 space-y-6 lg:space-y-8">
+        <div className={hasRightColumnContent ? "grid gap-8 lg:gap-16 lg:grid-cols-2 lg:items-start" : ""}>
+        <div className={`relative z-10 bg-white rounded-xl border border-gray-100 p-4 sm:p-6 lg:p-8 space-y-6 lg:space-y-8 ${!hasRightColumnContent ? 'w-full max-w-2xl' : 'lg:self-start'}`}>
           <ReadySizes
             currentSizes={currentSizes}
             selectedSize={selectedSize}
@@ -445,14 +482,11 @@ export function ProductConfigurator({ productId }: ProductConfiguratorProps) {
                         setCustomWidth(size.width);
                         setCustomHeight(size.height);
               
-              // Close custom order form if it's open
-              setShowCustomOrder(false);
-              
                         const sizePerimeter = (size.width + size.height) * 2;
                         
               // Special logic for special products
               if (isSpecialProduct(productId)) {
-                const allowedFlaps = getAllowedFlaps(productId, sizePerimeter);
+                const allowedFlaps = getAllowedFlaps(productId, sizePerimeter, size.width, size.height);
                           if (allowedFlaps.length > 0) {
                             // Set to first allowed option
                             if (allowedFlaps.includes(1)) {
@@ -475,6 +509,8 @@ export function ProductConfigurator({ productId }: ProductConfiguratorProps) {
                           }
                         }
                       }}
+            selectedSizesWithQuantity={selectedSizesWithQuantity}
+            onQuantityChange={handleQuantityChange}
           />
 
           {selectedPerimeterData?.hasDoubleDoorOption &&
@@ -534,13 +570,13 @@ export function ProductConfigurator({ productId }: ProductConfiguratorProps) {
                 }
                 setShowCustomOrder(!showCustomOrder);
               }}
-              className="w-full border-gray-300 hover:bg-gray-50 text-gray-700 py-3"
+              className="w-full border-gray-300 bg-red-50 hover:bg-red-100 hover:text-red-800 text-red-700 py-3"
             >
               {showCustomOrder ? t("cfg.closeCustomOrder") : t("cfg.customOrder")}
             </Button>
           </div>
 
-          <div>
+          {/* <div>
             <h3 className="text-lg font-bold text-black mb-4">
               {t("cfg.quantity")}
             </h3>
@@ -568,9 +604,9 @@ export function ProductConfigurator({ productId }: ProductConfiguratorProps) {
                 <Plus className="h-4 w-4" />
               </Button>
             </div>
-          </div>
+          </div> */}
 
-          <div>
+          {/* <div>
             <h3 className="text-lg font-bold text-black mb-4">
               {t("cfg.total")}
             </h3>
@@ -592,19 +628,123 @@ export function ProductConfigurator({ productId }: ProductConfiguratorProps) {
               <ShoppingCart className="mr-2 h-5 w-5" />
               {showCustomOrder ? t("cfg.submitOrder") : t("cfg.checkout")}
             </Button>
-          </div>
+          </div> */}
         </div>
 
-        {showCustomOrder && (
-          <CustomOrderForm
-            productId={productId}
-            customOrderData={customOrderData}
-            onDataChange={setCustomOrderData}
-            onClose={() => setShowCustomOrder(false)}
-            isCeilingInstallation={isCeilingInstallation}
-            onInstallationTypeChange={setIsCeilingInstallation}
-          />
+        {hasRightColumnContent && (
+          <div className="lg:self-start">
+            {showCustomOrder && (
+              <div className="space-y-6">
+                <CustomOrderForm
+                  productId={productId}
+                  customOrderData={customOrderData}
+                  onDataChange={setCustomOrderData}
+                  onClose={() => setShowCustomOrder(false)}
+                  isCeilingInstallation={isCeilingInstallation}
+                  onInstallationTypeChange={setIsCeilingInstallation}
+                  onPriceCalculated={(price, hasOrder) => {
+                    setCustomOrderPrice(price);
+                    setHasCustomOrder(hasOrder);
+                    // Check if perimeter exceeds max perimeter for special products
+                    const width = Number(customOrderData.width);
+                    const height = Number(customOrderData.height);
+                    const perimeter = (width + height) * 2;
+                    const maxPerimeter = getMaxPerimeterForProduct(productId);
+                    setCustomOrderExceedsLimit(perimeter > maxPerimeter);
+                  }}
+                />
+              </div>
             )}
+
+            {/* Final Check - Combined Order Summary */}
+            {(selectedSizesWithQuantity.length > 0 || (hasCustomOrder && customOrderData.quantity > 0)) && (
+              <div className="relative z-10 bg-white border rounded-lg border-gray-300 p-4 mt-6">
+                {/* Ready Sizes */}
+                {selectedSizesWithQuantity.map((item) => {
+                  const subtotal = item.size.priceUZS * item.quantity;
+                  const displayText = t("cfg.checkoutItemFormat")
+                    .replace("{width}", item.size.width.toString())
+                    .replace("{height}", item.size.height.toString())
+                    .replace("{quantity}", item.quantity.toString())
+                    .replace("{type}", t("cfg.readySizeLabel"));
+                  return (
+                    <div key={item.size.id} className="flex justify-between py-2">
+                      <span className="text-base text-black">{displayText}</span>
+                      <span className="text-base font-bold text-black">{subtotal.toLocaleString("ru-RU")} UZS</span>
+                    </div>
+                  );
+                })}
+
+                {/* Custom Order */}
+                {hasCustomOrder && customOrderData.quantity > 0 && (
+                  <div>
+                    <div className="flex justify-between py-2">
+                      <span className="text-base text-black">{t("cfg.checkoutItemFormat")
+                        .replace("{width}", customOrderData.width)
+                        .replace("{height}", customOrderData.height)
+                        .replace("{quantity}", String(customOrderData.quantity || 1))
+                        .replace("{type}", t("cfg.customSizeLabel"))}</span>
+                      {!customOrderExceedsLimit && (
+                        <span className="text-base font-bold text-black">{(customOrderPrice * (customOrderData.quantity || 1)).toLocaleString("ru-RU")} UZS</span>
+                      )}
+                    </div>
+                    {customOrderExceedsLimit && (
+                      <div className="text-xs text-gray-600 italic mt-1 mb-2">
+                        {selectedSizesWithQuantity.length > 0 ? t("cfg.customOrderMixedNote") : t("cfg.customOrderPriceNote")}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <div className="border-t border-gray-300 my-3"></div>
+
+                {/* Total */}
+                <div className="flex justify-between">
+                  <span className="text-lg font-bold text-black">{t("cfg.totalLabel")}</span>
+                  <span className="text-2xl font-bold text-black">
+                    {(selectedSizesWithQuantity
+                      .reduce((sum, item) => sum + item.size.priceUZS * item.quantity, 0) + 
+                      (hasCustomOrder && !customOrderExceedsLimit ? customOrderPrice * (customOrderData.quantity || 1) : 0))
+                      .toLocaleString("ru-RU")}{" "}
+                    UZS
+                  </span>
+                </div>
+
+                <Button
+                  className="w-full bg-red-600 hover:bg-red-700 text-white py-3 text-lg font-medium rounded-lg mt-4"
+                  onClick={() => {
+                    const totalPrice = selectedSizesWithQuantity
+                      .reduce((sum, item) => sum + item.size.priceUZS * item.quantity, 0) + 
+                      (hasCustomOrder && !customOrderExceedsLimit ? customOrderPrice * (customOrderData.quantity || 1) : 0);
+                    
+                    const orderData = {
+                      readySizes: selectedSizesWithQuantity,
+                      customOrder: hasCustomOrder ? {
+                        width: Number(customOrderData.width),
+                        height: Number(customOrderData.height),
+                        flaps: customOrderData.flaps,
+                        quantity: customOrderData.quantity || 1,
+                        price: customOrderPrice,
+                      } : null,
+                      totalPrice: totalPrice,
+                      productId: productId,
+                      modelName: localizedProduct?.name || product?.name || "Unknown Product",
+                    };
+                    
+                    localStorage.setItem("combinedOrder", JSON.stringify(orderData));
+                    localStorage.removeItem("currentOrder");
+                    localStorage.removeItem("customOrder");
+                    router.push("/checkout");
+                  }}
+                >
+                  <ShoppingCart className="mr-2 h-5 w-5" />
+                  {t("cfg.checkoutBtn")}
+                </Button>
+              </div>
+            )}
+
+          </div>
+        )}
 
       </div>
     </div>

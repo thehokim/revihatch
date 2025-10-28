@@ -32,7 +32,7 @@ export function useCurrency() {
     setLoading(true);
     
     try {
-      const response = await fetch("https://cbu.uz/ru/arkhiv-kursov-valyut/json/USD/");
+      const response = await fetch("https://api.lyukirevizor.uz/api/usd-rate");
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -40,8 +40,8 @@ export function useCurrency() {
       
       const data = await response.json();
       
-      if (Array.isArray(data) && data.length > 0 && data[0].Rate) {
-        const rate = parseFloat(data[0].Rate);
+      if (data && data.rate && typeof data.rate === 'number') {
+        const rate = data.rate;
         
         if (isNaN(rate) || rate <= 0) {
           throw new Error("Invalid rate received from API");
@@ -49,7 +49,7 @@ export function useCurrency() {
         
         const newData: CurrencyData = {
           rate,
-          lastUpdated: new Date(),
+          lastUpdated: new Date(data.updatedAt || new Date()),
         };
         
         // Cache the data

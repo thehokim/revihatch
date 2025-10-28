@@ -28,7 +28,7 @@ export function InstallationTypeSelector({
             className="sr-only"
           />
           <div
-            className={`p-3 border-2 rounded-lg text-center transition-all duration-200 h-20 flex flex-col justify-center space-y-1 ${
+            className={`p-3 border-2 rounded-lg text-center transition-all duration-200 h-12 flex flex-col justify-center space-y-1 ${
               !isCeilingInstallation
                 ? "bg-white border-gray-600 shadow-sm"
                 : "bg-white border-gray-300 hover:border-gray-400 hover:shadow-sm"
@@ -36,9 +36,6 @@ export function InstallationTypeSelector({
           >
             <div className="text-sm font-medium text-gray-900">
               {t("cfg.wallInstallation")}
-            </div>
-            <div className="text-xs text-gray-600">
-              {t("cfg.basePrice")}
             </div>
           </div>
         </label>
@@ -52,7 +49,7 @@ export function InstallationTypeSelector({
             className="sr-only"
           />
           <div
-            className={`p-3 border-2 rounded-lg text-center transition-all duration-200 h-20 flex flex-col justify-center space-y-1 ${
+            className={`p-3 border-2 rounded-lg text-center transition-all duration-200 h-12 flex flex-col justify-center space-y-1 ${
               isCeilingInstallation
                 ? "bg-white border-gray-600 shadow-sm"
                 : "bg-white border-gray-300 hover:border-gray-400 hover:shadow-sm"
@@ -60,9 +57,6 @@ export function InstallationTypeSelector({
           >
             <div className="text-sm font-medium text-gray-900">
               {t("cfg.ceilingInstallation")}
-            </div>
-            <div className="text-xs text-gray-600">
-              {t("cfg.ceilingSurcharge")}
             </div>
           </div>
         </label>

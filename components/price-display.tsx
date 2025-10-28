@@ -8,7 +8,7 @@ import { useCurrency } from "@/hooks/use-currency";
 const getMaxPerimeter = (productId: string): number => {
   if (productId === "68f36177f6edd352f8920e21") {
     return 360;
-  } else if (productId === "68f8b52c7a3c09f23e7a080b") {
+  } else if (productId === "69006228bafc5fb7b6d2a888") {
     return 440;
   }
   return 800; // Default for other special products

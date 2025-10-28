@@ -218,8 +218,17 @@ function CheckoutPageContent({ onSuccess }: { onSuccess: () => void }) {
   useEffect(() => {
     const storedOrder = localStorage.getItem("currentOrder");
     const customOrder = localStorage.getItem("customOrder");
+    const combinedOrder = localStorage.getItem("combinedOrder");
     
-    if (storedOrder) {
+    if (combinedOrder) {
+      const parsedCombinedOrder = JSON.parse(combinedOrder);
+      // Convert combined order to orderData format
+      // For combined order, show summary in the checkout
+      setOrderData({
+        ...parsedCombinedOrder,
+        isCombinedOrder: true
+      } as any);
+    } else if (storedOrder) {
       const parsedOrder = JSON.parse(storedOrder);
       setOrderData(parsedOrder);
     } else if (customOrder) {
@@ -235,23 +244,65 @@ function CheckoutPageContent({ onSuccess }: { onSuccess: () => void }) {
     setIsSubmitting(true);
 
     try {
-      const orderPayload = {
-        fio: formData.fio,
-        phone: formData.phone.replace(/\s/g, ""),
-        email: formData.email || undefined,
-        productType: getLocalizedProductName(
-          orderData?.modelName || "transformer"
-        ),
-        size: getDisplaySize(),
-        quantity: orderData?.quantity || 1,
-        totalPrice: orderData?.totalPrice || 0,
-        paymentType: getRussianPaymentType(formData.paymentType),
-        location: formData.location,
-        comments: formData.comments || undefined,
-        locationCoords: addressCoords
-          ? [addressCoords.lat, addressCoords.lng]
-          : undefined,
-      };
+      // Handle combined orders (ready sizes + custom order)
+      const isCombinedOrder = (orderData as any)?.isCombinedOrder;
+      
+      let orderPayload;
+      
+      if (isCombinedOrder && (orderData as any).readySizes) {
+        // Combined order - send multiple items
+        const items = [];
+        
+        // Add ready sizes
+        if ((orderData as any).readySizes && (orderData as any).readySizes.length > 0) {
+          (orderData as any).readySizes.forEach((item: any) => {
+            items.push({
+              type: getLocalizedProductName(orderData?.modelName || "transformer"),
+              size: `${item.size.width} × ${item.size.height} ${t("cfg.units.cm")} (${t("cfg.readySizeLabel")})`,
+              quantity: item.quantity,
+              price: item.size.priceUZS * item.quantity
+            });
+          });
+        }
+        
+        // Add custom order if exists
+        if ((orderData as any).customOrder) {
+          const custom = (orderData as any).customOrder;
+          items.push({
+            type: getLocalizedProductName(orderData?.modelName || "transformer"),
+            size: `${custom.width} × ${custom.height} ${t("cfg.units.cm")} (${t("cfg.customSizeLabel")})`,
+            quantity: custom.quantity,
+            price: custom.price * custom.quantity
+          });
+        }
+        
+        orderPayload = {
+          fio: formData.fio,
+          phone: formData.phone.replace(/\s/g, ""),
+          email: formData.email || undefined,
+          items: items,
+          totalPrice: orderData?.totalPrice || 0,
+          paymentType: getRussianPaymentType(formData.paymentType),
+          location: formData.location,
+          comments: formData.comments || undefined,
+          locationCoords: addressCoords ? [addressCoords.lat, addressCoords.lng] : undefined,
+        };
+      } else {
+        // Regular single order
+        orderPayload = {
+          fio: formData.fio,
+          phone: formData.phone.replace(/\s/g, ""),
+          email: formData.email || undefined,
+          productType: getLocalizedProductName(orderData?.modelName || "transformer"),
+          size: getDisplaySize(),
+          quantity: orderData?.quantity || 1,
+          totalPrice: orderData?.totalPrice || 0,
+          paymentType: getRussianPaymentType(formData.paymentType),
+          location: formData.location,
+          comments: formData.comments || undefined,
+          locationCoords: addressCoords ? [addressCoords.lat, addressCoords.lng] : undefined,
+        };
+      }
 
       const response = await fetch("https://api.lyukirevizor.uz/api/orders", {
         method: "POST",
@@ -283,6 +334,7 @@ function CheckoutPageContent({ onSuccess }: { onSuccess: () => void }) {
 
       localStorage.removeItem("currentOrder");
       localStorage.removeItem("customOrder");
+      localStorage.removeItem("combinedOrder");
     } catch (error) {
       setIsSubmitting(false);
       alert("Ошибка при оформлении заказа. Попробуйте еще раз.");

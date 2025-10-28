@@ -3,7 +3,15 @@ import { NextRequest, NextResponse } from 'next/server'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const requiredFields = ['fio', 'phone', 'productType', 'size', 'quantity', 'totalPrice', 'paymentType', 'location']
+    
+    // Check if it's a combined order (has items array)
+    const isCombinedOrder = body.items && Array.isArray(body.items)
+    
+    // Different required fields for combined vs single orders
+    const requiredFields = isCombinedOrder 
+      ? ['fio', 'phone', 'items', 'totalPrice', 'paymentType', 'location']
+      : ['fio', 'phone', 'productType', 'size', 'quantity', 'totalPrice', 'paymentType', 'location']
+    
     const missingFields = requiredFields.filter(field => !body[field])
     
     if (missingFields.length > 0) {
@@ -44,10 +52,18 @@ export async function POST(request: NextRequest) {
       fio: body.fio,
       phone: body.phone,
       email: body.email || null,
-      productType: body.productType,
-      size: body.size,
-      quantity: parseInt(body.quantity),
-      totalPrice: parseInt(body.totalPrice),
+      ...(isCombinedOrder 
+        ? {
+            items: body.items,
+            totalPrice: parseInt(body.totalPrice)
+          }
+        : {
+            productType: body.productType,
+            size: body.size,
+            quantity: parseInt(body.quantity),
+            totalPrice: parseInt(body.totalPrice)
+          }
+      ),
       paymentType: body.paymentType,
       location: body.location,
       comments: body.comments || null,
