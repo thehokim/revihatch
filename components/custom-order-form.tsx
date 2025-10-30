@@ -52,7 +52,7 @@ export function CustomOrderForm({
       const width = Number(customOrderData.width);
       const height = Number(customOrderData.height);
       
-      if (productId === "69006228bafc5fb7b6d2a888" && Number.isFinite(width) && Number.isFinite(height) && width > 0 && height > 0) {
+      if ((productId === "69006228bafc5fb7b6d2a888" || productId === "68f36177f6edd352f8920e1d") && Number.isFinite(width) && Number.isFinite(height) && width > 0 && height > 0) {
         // Use 40% rule for this specific product
         const widthRatio = width / height;
         const heightRatio = height / width;
@@ -138,8 +138,21 @@ export function CustomOrderForm({
       return;
     }
     
-    // Check if size is below minimum (15x15)
-    if (width < 15 || height < 15) {
+    // Check minimum size based on product
+    let minWidth = 15;
+    let minHeight = 15;
+    if (productId === "68ff560a5c85e742c1891de5") {
+      minWidth = 20;
+      minHeight = 30;
+    } else if (productId === "69006228bafc5fb7b6d2a888") {
+      minWidth = 15;
+      minHeight = 15;
+    } else if (productId === "68f36177f6edd352f8920e1d") {
+      minWidth = 15;
+      minHeight = 15;
+    }
+    
+    if (width < minWidth || height < minHeight) {
       setShowMinSizeModal(true);
       return;
     }
@@ -149,10 +162,22 @@ export function CustomOrderForm({
     
     // Check if aspect ratio exceeds 170%
     if (widthRatio > 1.7 || heightRatio > 1.7) {
-      // Reset values to minimum size (15x15) when showing modal
+      // Reset values to minimum size based on product when showing modal
+      let resetWidth = "15";
+      let resetHeight = "15";
+      if (productId === "68ff560a5c85e742c1891de5") {
+        resetWidth = "20";
+        resetHeight = "30";
+      } else if (productId === "69006228bafc5fb7b6d2a888") {
+        resetWidth = "15";
+        resetHeight = "15";
+      } else if (productId === "68f36177f6edd352f8920e1d") {
+        resetWidth = "15";
+        resetHeight = "15";
+      }
       onDataChange({
-        width: "15",
-        height: "15",
+        width: resetWidth,
+        height: resetHeight,
         flaps: customOrderData.flaps,
         quantity: customOrderData.quantity
       });
@@ -182,6 +207,23 @@ export function CustomOrderForm({
   const height = Number(customOrderData.height);
   const perimeter = Number.isFinite(width) && Number.isFinite(height) ? (width + height) * 2 : 0;
   const allowedFlaps = getAllowedFlaps(productId, perimeter, width, height);
+
+  // Get minimum dimensions based on product
+  const getMinWidth = () => {
+    if (productId === "68ff560a5c85e742c1891de5") return 20;
+    if (productId === "69006228bafc5fb7b6d2a888") return 15;
+    if (productId === "68f36177f6edd352f8920e1d") return 15;
+    if (productId === "68f36177f6edd352f8920e1f") return 15;
+    return 15;
+  };
+
+  const getMinHeight = () => {
+    if (productId === "68ff560a5c85e742c1891de5") return 30;
+    if (productId === "69006228bafc5fb7b6d2a888") return 15;
+    if (productId === "68f36177f6edd352f8920e1d") return 15;
+    if (productId === "68f36177f6edd352f8920e1f") return 15;
+    return 15;
+  };
 
   // Визуальная схема для специальных продуктов
   const showSpecialLayout = isSpecialProduct(productId);
@@ -386,7 +428,7 @@ export function CustomOrderForm({
                       <Input
                         id="custom-height"
                         type="number"
-                        min="15"
+                        min={getMinHeight()}
                         max="200"
                         value={customOrderData.height}
                         onChange={(e) => handleHeightChange(e.target.value)}
@@ -409,7 +451,7 @@ export function CustomOrderForm({
                       <Input
                         id="custom-width"
                         type="number"
-                        min="15"
+                        min={getMinWidth()}
                         max="200"
                         value={customOrderData.width}
                         onChange={(e) => handleWidthChange(e.target.value)}
@@ -434,7 +476,7 @@ export function CustomOrderForm({
                       <Input
                         id="custom-width"
                         type="number"
-                        min="15"
+                        min={getMinWidth()}
                         max="200"
                         value={customOrderData.width}
                         onChange={(e) => handleWidthChange(e.target.value)}
@@ -457,7 +499,7 @@ export function CustomOrderForm({
                       <Input
                         id="custom-height"
                         type="number"
-                        min="15"
+                        min={getMinHeight()}
                         max="200"
                         value={customOrderData.height}
                         onChange={(e) => handleHeightChange(e.target.value)}
@@ -473,7 +515,7 @@ export function CustomOrderForm({
             </div>
 
             {/* Опции для special product */}
-            {isSpecialProduct(productId) && isCeilingInstallation !== undefined && onInstallationTypeChange ? (
+            {isSpecialProduct(productId) && productId !== "68ff560a5c85e742c1891de5" && productId !== "68f36177f6edd352f8920e1f" && isCeilingInstallation !== undefined && onInstallationTypeChange ? (
               <>
                 <div>
                   <Label className="text-sm font-medium text-gray-700 mb-3 block">
@@ -540,6 +582,63 @@ export function CustomOrderForm({
                   />
                 )}
               </>
+            ) : isSpecialProduct(productId) && (productId === "68ff560a5c85e742c1891de5" || productId === "68f36177f6edd352f8920e1f") ? (
+              <div>
+                <Label className="text-sm font-medium text-gray-700 mb-3 block">
+                  {t("cfg.flapType")}
+                </Label>
+                <div className="grid grid-cols-2 gap-3">
+                  <label className={`relative cursor-pointer group ${!allowedFlaps.includes(1) ? 'cursor-not-allowed' : ''}`}>
+                    <input
+                      type="radio"
+                      name="flaps"
+                      value={1}
+                      checked={customOrderData.flaps === 1}
+                      onChange={(e) => handleFlapsChange(Number(e.target.value))}
+                      disabled={!allowedFlaps.includes(1)}
+                      className="sr-only"
+                    />
+                    <div
+                      className={`p-3 border-2 rounded-lg text-center transition-all duration-200 ${
+                        customOrderData.flaps === 1
+                          ? "bg-white border-gray-600 shadow-sm"
+                          : !allowedFlaps.includes(1)
+                          ? "bg-gray-100 border-gray-200 opacity-50"
+                          : "bg-white border-gray-300 hover:border-gray-400 hover:shadow-sm"
+                      }`}
+                    >
+                      <div className="text-sm font-medium text-gray-900">
+                        {t("cfg.singleFlap")}
+                      </div>
+                    </div>
+                  </label>
+
+                  <label className={`relative cursor-pointer group ${!allowedFlaps.includes(2) ? 'cursor-not-allowed' : ''}`}>
+                    <input
+                      type="radio"
+                      name="flaps"
+                      value={2}
+                      checked={customOrderData.flaps === 2}
+                      onChange={(e) => handleFlapsChange(Number(e.target.value))}
+                      disabled={!allowedFlaps.includes(2)}
+                      className="sr-only"
+                    />
+                    <div
+                      className={`p-3 border-2 rounded-lg text-center transition-all duration-200 ${
+                        customOrderData.flaps === 2
+                          ? "bg-white border-gray-600 shadow-sm"
+                          : !allowedFlaps.includes(2)
+                          ? "bg-gray-100 border-gray-200 opacity-50"
+                          : "bg-white border-gray-300 hover:border-gray-400 hover:shadow-sm"
+                      }`}
+                    >
+                      <div className="text-sm font-medium text-gray-900">
+                        {t("cfg.doubleFlap")}
+                      </div>
+                    </div>
+                  </label>
+                </div>
+              </div>
             ) : (
               <div>
                 <Label className="text-sm font-medium text-gray-700 mb-3 block">
@@ -724,13 +823,25 @@ export function CustomOrderForm({
                 <AlertCircle className="h-6 w-6 text-orange-600" />
               </div>
               <DialogTitle className="text-xl font-bold text-gray-900">
-                {t("cfg.minSizeTitle")}
+                {productId === "68ff560a5c85e742c1891de5" 
+                  ? "Минимальный размер 20x30 см"
+                  : productId === "69006228bafc5fb7b6d2a888"
+                  ? "Минимальный размер 15x15 см"
+                  : productId === "68f36177f6edd352f8920e1d"
+                  ? "Минимальный размер 15x15 см"
+                  : t("cfg.minSizeTitle")}
               </DialogTitle>
             </div>
           </DialogHeader>
           <div className="pt-4">
             <p className="text-gray-700 text-base leading-relaxed">
-              {t("cfg.minSizeDesc")}
+              {productId === "68ff560a5c85e742c1891de5"
+                ? "Размеры должны быть не менее: ширина 20 см, высота 30 см. Пожалуйста, введите корректные размеры."
+                : productId === "69006228bafc5fb7b6d2a888"
+                ? "Размеры должны быть не менее: ширина 15 см, высота 15 см. Пожалуйста, введите корректные размеры."
+                : productId === "68f36177f6edd352f8920e1d"
+                ? "Размеры должны быть не менее: ширина 15 см, высота 15 см. Пожалуйста, введите корректные размеры."
+                : t("cfg.minSizeDesc")}
             </p>
             <Button 
               onClick={() => setShowMinSizeModal(false)}

@@ -80,11 +80,27 @@ export function ProductConfigurator({ productId }: ProductConfiguratorProps) {
   const [isCeilingInstallation, setIsCeilingInstallation] = useState(false);
   const [isTripleDoor, setIsTripleDoor] = useState(false);
   const [showCustomOrder, setShowCustomOrder] = useState(false);
-  const [customOrderData, setCustomOrderData] = useState({
-    width: "15",
-    height: "15",
-    flaps: 1,
-    quantity: 1,
+  
+  // Get initial dimensions based on product
+  const getInitialCustomOrderDimensions = () => {
+    if (productId === "68ff560a5c85e742c1891de5") {
+      return { width: "20", height: "30" };
+    } else if (productId === "69006228bafc5fb7b6d2a888") {
+      return { width: "15", height: "15" };
+    } else if (productId === "68f36177f6edd352f8920e1d") {
+      return { width: "15", height: "15" };
+    }
+    return { width: "15", height: "15" };
+  };
+  
+  const [customOrderData, setCustomOrderData] = useState(() => {
+    const dims = getInitialCustomOrderDimensions();
+    return {
+      width: dims.width,
+      height: dims.height,
+      flaps: 1,
+      quantity: 1,
+    };
   });
   const [currency, setCurrency] = useState<"USD" | "UZS">("UZS");
   const [selectedSizesWithQuantity, setSelectedSizesWithQuantity] = useState<SelectedSizeWithQuantity[]>([]);
@@ -98,6 +114,26 @@ export function ProductConfigurator({ productId }: ProductConfiguratorProps) {
       setCurrency("UZS");
     }
   }, [productId]);
+
+  // Update custom order dimensions when product changes or form opens
+  useEffect(() => {
+    if (showCustomOrder) {
+      const dims = getInitialCustomOrderDimensions();
+      const currentWidth = Number(customOrderData.width);
+      const currentHeight = Number(customOrderData.height);
+      const minWidth = Number(dims.width);
+      const minHeight = Number(dims.height);
+      
+      // Update dimensions if current values are below minimum for this product
+      if (currentWidth < minWidth || currentHeight < minHeight) {
+        setCustomOrderData(prev => ({
+          ...prev,
+          width: dims.width,
+          height: dims.height,
+        }));
+      }
+    }
+  }, [showCustomOrder, productId]);
 
   const getCurrentProduct = () => {
     if (product) {

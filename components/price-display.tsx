@@ -4,14 +4,17 @@ import { useI18n } from "@/components/i18n-provider";
 import { PricingInfo, isSpecialProduct } from "./special-pricing";
 import { useCurrency } from "@/hooks/use-currency";
 
-// Helper function to get max perimeter for a product
 const getMaxPerimeter = (productId: string): number => {
-  if (productId === "68f36177f6edd352f8920e21") {
+  if (productId === "68f36177f6edd352f8920e1f") {
+    return 720;
+  } else if (productId === "68f36177f6edd352f8920e21") {
+    return 360;
+  } else if (productId === "68ff560a5c85e742c1891de5") {
     return 360;
   } else if (productId === "69006228bafc5fb7b6d2a888") {
     return 440;
   }
-  return 800; // Default for other special products
+  return 800;
 };
 
 interface PriceDisplayProps {
