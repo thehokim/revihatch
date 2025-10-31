@@ -41,6 +41,7 @@ export function CustomOrderForm({
   const [showLimitModal, setShowLimitModal] = useState(false);
   const [showMinSizeModal, setShowMinSizeModal] = useState(false);
   const [showPriceModal, setShowPriceModal] = useState(false);
+  const [showDoubleFlapsHeightLimitModal, setShowDoubleFlapsHeightLimitModal] = useState(false);
   const [calculatedPrice, setCalculatedPrice] = useState(0);
   const [isPriceCalculated, setIsPriceCalculated] = useState(false);
   const [lastCalculatedDimensions, setLastCalculatedDimensions] = useState({ width: "", height: "" });
@@ -133,6 +134,33 @@ export function CustomOrderForm({
     });
   };
 
+  // Handle blur event for dimension inputs - check and swap if needed
+  const handleDimensionBlur = () => {
+    // Special rule for product 68f36177f6edd352f8920e1f: height cannot exceed width by more than 30%
+    if (productId === "68f36177f6edd352f8920e1f") {
+      const width = Number(customOrderData.width);
+      const height = Number(customOrderData.height);
+      
+      if (Number.isFinite(width) && Number.isFinite(height) && width > 0 && height > 0) {
+        // For double flaps (2 створки), height cannot exceed width * 0.55
+        if (customOrderData.flaps === 2 && height > width * 0.55) {
+          // Show warning modal
+          setShowDoubleFlapsHeightLimitModal(true);
+          return;
+        }
+        
+        // If height exceeds width by more than 30%, swap width and height
+        if (height > width * 1.3) {
+          onDataChange({
+            ...customOrderData,
+            width: String(height),
+            height: String(width)
+          });
+        }
+      }
+    }
+  };
+
   const handleCalculate = () => {
     if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
       return;
@@ -150,6 +178,9 @@ export function CustomOrderForm({
     } else if (productId === "68f36177f6edd352f8920e1d") {
       minWidth = 15;
       minHeight = 15;
+    } else if (productId === "68f36177f6edd352f8920e1f") {
+      minWidth = 25;
+      minHeight = 25;
     }
     
     if (width < minWidth || height < minHeight) {
@@ -157,11 +188,20 @@ export function CustomOrderForm({
       return;
     }
     
+    // Special check for product 68f36177f6edd352f8920e1f with 2 flaps
+    // Height cannot exceed width * 0.55 (height cannot exceed width by more than -45%)
+    if (productId === "68f36177f6edd352f8920e1f" && customOrderData.flaps === 2) {
+      if (height > width * 0.55) {
+        setShowDoubleFlapsHeightLimitModal(true);
+        return;
+      }
+    }
+    
     const widthRatio = width / height;
     const heightRatio = height / width;
     
     // Check if aspect ratio exceeds 170%
-    if (widthRatio > 1.7 || heightRatio > 1.7) {
+    if (widthRatio > 2.7 || heightRatio > 2.7) {
       // Reset values to minimum size based on product when showing modal
       let resetWidth = "15";
       let resetHeight = "15";
@@ -174,6 +214,9 @@ export function CustomOrderForm({
       } else if (productId === "68f36177f6edd352f8920e1d") {
         resetWidth = "15";
         resetHeight = "15";
+      } else if (productId === "68f36177f6edd352f8920e1f") {
+        resetWidth = "25";
+        resetHeight = "25";
       }
       onDataChange({
         width: resetWidth,
@@ -213,7 +256,7 @@ export function CustomOrderForm({
     if (productId === "68ff560a5c85e742c1891de5") return 20;
     if (productId === "69006228bafc5fb7b6d2a888") return 15;
     if (productId === "68f36177f6edd352f8920e1d") return 15;
-    if (productId === "68f36177f6edd352f8920e1f") return 15;
+    if (productId === "68f36177f6edd352f8920e1f") return 25;
     return 15;
   };
 
@@ -221,7 +264,7 @@ export function CustomOrderForm({
     if (productId === "68ff560a5c85e742c1891de5") return 30;
     if (productId === "69006228bafc5fb7b6d2a888") return 15;
     if (productId === "68f36177f6edd352f8920e1d") return 15;
-    if (productId === "68f36177f6edd352f8920e1f") return 15;
+    if (productId === "68f36177f6edd352f8920e1f") return 25;
     return 15;
   };
 
@@ -313,8 +356,20 @@ export function CustomOrderForm({
                   y1={rectY + rectHeight / 2}
                   x2={rectX + rectWidth}
                   y2={rectY + rectHeight / 2}
-                  stroke="#999"
-                  strokeWidth="2"
+                  stroke={
+                    productId === "68f36177f6edd352f8920e1f"
+                      ? "#999"
+                      : customOrderData.flaps === 2
+                      ? "#000"
+                      : "#999"
+                  }
+                  strokeWidth={
+                    productId === "68f36177f6edd352f8920e1f"
+                      ? "2"
+                      : customOrderData.flaps === 2
+                      ? "3"
+                      : "2"
+                  }
                 />
                 
                 {/* Вертикальная линия по центру */}
@@ -323,35 +378,77 @@ export function CustomOrderForm({
                   y1={rectY}
                   x2={rectX + rectWidth / 2}
                   y2={rectY + rectHeight}
-                  stroke={customOrderData.flaps === 2 ? "#000" : "#999"}
-                  strokeWidth={customOrderData.flaps === 2 ? "3" : "2"}
+                  stroke={
+                    productId === "68f36177f6edd352f8920e1f" && customOrderData.flaps === 2
+                      ? "#000"
+                      : customOrderData.flaps === 2
+                      ? "#000"
+                      : "#999"
+                  }
+                  strokeWidth={
+                    productId === "68f36177f6edd352f8920e1f" && customOrderData.flaps === 2
+                      ? "3"
+                      : customOrderData.flaps === 2
+                      ? "3"
+                      : "2"
+                  }
                 />
                 
                 {/* Черный круг(и) в зависимости от типа створок */}
                 {customOrderData.flaps === 1 ? (
-                  // Один круг для одностворчатого - на пересечении линий справа, дальше от центра
-                  <circle
-                    cx={rectX + rectWidth * 0.85}
-                    cy={rectY + rectHeight / 2}
-                    r="8"
-                    fill="#000"
-                  />
+                  // Один круг для одностворчатого
+                  productId === "68f36177f6edd352f8920e1f" ? (
+                    // Для этого продукта круг на нижней линии по центру
+                    <circle
+                      cx={rectX + rectWidth / 2}
+                      cy={rectY + rectHeight * 0.85}
+                      r="8"
+                      fill="#000"
+                    />
+                  ) : (
+                    // Для других - на пересечении линий справа, дальше от центра
+                    <circle
+                      cx={rectX + rectWidth * 0.85}
+                      cy={rectY + rectHeight / 2}
+                      r="8"
+                      fill="#000"
+                    />
+                  )
                 ) : (
-                  // Два круга для двухстворчатого - на горизонтальной линии ближе друг к другу
-                  <>
-                    <circle
-                      cx={rectX + rectWidth * 0.4}
-                      cy={rectY + rectHeight / 2}
-                      r="8"
-                      fill="#000"
-                    />
-                    <circle
-                      cx={rectX + rectWidth * 0.6}
-                      cy={rectY + rectHeight / 2}
-                      r="8"
-                      fill="#000"
-                    />
-                  </>
+                  // Два круга для двухстворчатого
+                  productId === "68f36177f6edd352f8920e1f" ? (
+                    // Для этого продукта круги в левой нижней и правой нижней части
+                    <>
+                      <circle
+                        cx={rectX + rectWidth * 0.25}
+                        cy={rectY + rectHeight * 0.8}
+                        r="8"
+                        fill="#000"
+                      />
+                      <circle
+                        cx={rectX + rectWidth * 0.75}
+                        cy={rectY + rectHeight * 0.8}
+                        r="8"
+                        fill="#000"
+                      />
+                    </>
+                  ) : (
+                    // Для других - на горизонтальной линии ближе друг к другу
+                    <>
+                      <circle
+                        cx={rectX + rectWidth * 0.4}
+                        cy={rectY + rectHeight / 2}
+                        r="8"
+                        fill="#000"
+                      />
+                      <circle
+                        cx={rectX + rectWidth * 0.6}
+                        cy={rectY + rectHeight / 2}
+                        r="8"
+                        fill="#000"
+                      />
+                    </>
+                  )
                 )}
                 
                 {/* Определение стрелок */}
@@ -432,6 +529,7 @@ export function CustomOrderForm({
                         max="200"
                         value={customOrderData.height}
                         onChange={(e) => handleHeightChange(e.target.value)}
+                        onBlur={handleDimensionBlur}
                         className="pr-8 border-gray-300"
                       />
                       <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs text-gray-500">
@@ -455,6 +553,7 @@ export function CustomOrderForm({
                         max="200"
                         value={customOrderData.width}
                         onChange={(e) => handleWidthChange(e.target.value)}
+                        onBlur={handleDimensionBlur}
                         className="pr-8 border-gray-300"
                       />
                       <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs text-gray-500">
@@ -480,6 +579,7 @@ export function CustomOrderForm({
                         max="200"
                         value={customOrderData.width}
                         onChange={(e) => handleWidthChange(e.target.value)}
+                        onBlur={handleDimensionBlur}
                         className="pr-8 border-gray-300"
                       />
                       <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs text-gray-500">
@@ -503,6 +603,7 @@ export function CustomOrderForm({
                         max="200"
                         value={customOrderData.height}
                         onChange={(e) => handleHeightChange(e.target.value)}
+                        onBlur={handleDimensionBlur}
                         className="pr-8 border-gray-300"
                       />
                       <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs text-gray-500">
@@ -829,6 +930,8 @@ export function CustomOrderForm({
                   ? "Минимальный размер 15x15 см"
                   : productId === "68f36177f6edd352f8920e1d"
                   ? "Минимальный размер 15x15 см"
+                  : productId === "68f36177f6edd352f8920e1f"
+                  ? "Минимальный размер 25x25 см"
                   : t("cfg.minSizeTitle")}
               </DialogTitle>
             </div>
@@ -841,10 +944,47 @@ export function CustomOrderForm({
                 ? "Размеры должны быть не менее: ширина 15 см, высота 15 см. Пожалуйста, введите корректные размеры."
                 : productId === "68f36177f6edd352f8920e1d"
                 ? "Размеры должны быть не менее: ширина 15 см, высота 15 см. Пожалуйста, введите корректные размеры."
+                : productId === "68f36177f6edd352f8920e1f"
+                ? "Размеры должны быть не менее: ширина 25 см, высота 25 см. Пожалуйста, введите корректные размеры."
                 : t("cfg.minSizeDesc")}
             </p>
             <Button 
               onClick={() => setShowMinSizeModal(false)}
+              className="w-full mt-6 bg-orange-600 hover:bg-orange-700 text-white"
+            >
+              {t("cfg.understood")}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal for double flaps height limit (product 68f36177f6edd352f8920e1f) */}
+      <Dialog open={showDoubleFlapsHeightLimitModal} onOpenChange={(open) => !open && setShowDoubleFlapsHeightLimitModal(false)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 bg-orange-100 rounded-full">
+                <AlertCircle className="h-6 w-6 text-orange-600" />
+              </div>
+              <DialogTitle className="text-xl font-bold text-gray-900">
+                {t("cfg.dimensionsExceededTitle")}
+              </DialogTitle>
+            </div>
+          </DialogHeader>
+          <div className="pt-4">
+            <p className="text-gray-700 text-base leading-relaxed">
+              {t("cfg.dimensionsExceededDesc")}
+            </p>
+            <Button 
+              onClick={() => {
+                // Reset to minimum dimensions for this product
+                onDataChange({
+                  ...customOrderData,
+                  width: "25",
+                  height: "25"
+                });
+                setShowDoubleFlapsHeightLimitModal(false);
+              }}
               className="w-full mt-6 bg-orange-600 hover:bg-orange-700 text-white"
             >
               {t("cfg.understood")}

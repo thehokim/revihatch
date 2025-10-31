@@ -89,6 +89,8 @@ export function ProductConfigurator({ productId }: ProductConfiguratorProps) {
       return { width: "15", height: "15" };
     } else if (productId === "68f36177f6edd352f8920e1d") {
       return { width: "15", height: "15" };
+    } else if (productId === "68f36177f6edd352f8920e1f") {
+      return { width: "25", height: "25" };
     }
     return { width: "15", height: "15" };
   };

@@ -298,12 +298,35 @@ export const getAllowedFlaps = (productId: string, perimeter: number, width?: nu
   }
 
   if (productId === "68f36177f6edd352f8920e1f") {
-    if (perimeter <= 480) {
-      return [1, 2]; // Choice between 1 and 2 flaps up to 480
-    } else if (perimeter <= 720) {
-      return [2]; // Only 2 flaps allowed for 560-720
+    // Check if dimensions violate the 2-flap height restriction
+    // For 2 flaps, height cannot exceed width * 0.55
+    if (width !== undefined && height !== undefined && width > 0 && height > 0) {
+      const heightExceedsLimit = height > width * 0.55;
+      
+      if (perimeter <= 480) {
+        // If height exceeds the limit for 2 flaps, only allow 1 flap
+        if (heightExceedsLimit) {
+          return [1]; // Only 1 flap allowed when height > width * 0.55
+        }
+        return [1, 2]; // Choice between 1 and 2 flaps up to 480
+      } else if (perimeter <= 720) {
+        // For larger perimeters, 2 flaps is required, but check height limit
+        if (heightExceedsLimit) {
+          return []; // No valid configuration if height exceeds limit
+        }
+        return [2]; // Only 2 flaps allowed for 560-720
+      } else {
+        return []; // No flaps allowed above 720
+      }
     } else {
-      return []; // No flaps allowed above 720
+      // Fallback when dimensions not provided
+      if (perimeter <= 480) {
+        return [1, 2];
+      } else if (perimeter <= 720) {
+        return [2];
+      } else {
+        return [];
+      }
     }
   } else if (productId === "68f36177f6edd352f8920e21") {
     if (perimeter <= 160) {
