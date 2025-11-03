@@ -53,7 +53,7 @@ export function CustomOrderForm({
       const width = Number(customOrderData.width);
       const height = Number(customOrderData.height);
       
-      if ((productId === "69006228bafc5fb7b6d2a888" || productId === "68f36177f6edd352f8920e1d") && Number.isFinite(width) && Number.isFinite(height) && width > 0 && height > 0) {
+      if (productId === "69006228bafc5fb7b6d2a888" && Number.isFinite(width) && Number.isFinite(height) && width > 0 && height > 0) {
         // Use 40% rule for this specific product
         const widthRatio = width / height;
         const heightRatio = height / width;
@@ -65,6 +65,34 @@ export function CustomOrderForm({
               ...customOrderData,
               flaps: 2
             });
+          }
+        }
+      }
+      
+      if (productId === "68f36177f6edd352f8920e1d" && Number.isFinite(width) && Number.isFinite(height) && width > 0 && height > 0) {
+        const perimeter = (width + height) * 2;
+        
+        // If perimeter > 600, force 2 flaps (mandatory double-sided)
+        if (perimeter > 600) {
+          if (customOrderData.flaps !== 2) {
+            onDataChange({
+              ...customOrderData,
+              flaps: 2
+            });
+          }
+        } else {
+          // Use 50% rule for this specific product
+          const widthRatio = width / height;
+          const heightRatio = height / width;
+          
+          // If width or height exceeds the other by more than 50%, force 2 flaps
+          if (widthRatio > 1.5 || heightRatio > 1.5) {
+            if (customOrderData.flaps !== 2) {
+              onDataChange({
+                ...customOrderData,
+                flaps: 2
+              });
+            }
           }
         }
       }
@@ -176,8 +204,8 @@ export function CustomOrderForm({
       minWidth = 15;
       minHeight = 15;
     } else if (productId === "68f36177f6edd352f8920e1d") {
-      minWidth = 15;
-      minHeight = 15;
+      minWidth = 30;
+      minHeight = 30;
     } else if (productId === "68f36177f6edd352f8920e1f") {
       minWidth = 25;
       minHeight = 25;
@@ -200,32 +228,75 @@ export function CustomOrderForm({
     const widthRatio = width / height;
     const heightRatio = height / width;
     
-    // Check if aspect ratio exceeds 170%
-    if (widthRatio > 2.7 || heightRatio > 2.7) {
-      // Reset values to minimum size based on product when showing modal
-      let resetWidth = "15";
-      let resetHeight = "15";
-      if (productId === "68ff560a5c85e742c1891de5") {
-        resetWidth = "20";
-        resetHeight = "30";
-      } else if (productId === "69006228bafc5fb7b6d2a888") {
-        resetWidth = "15";
-        resetHeight = "15";
-      } else if (productId === "68f36177f6edd352f8920e1d") {
-        resetWidth = "15";
-        resetHeight = "15";
-      } else if (productId === "68f36177f6edd352f8920e1f") {
-        resetWidth = "25";
-        resetHeight = "25";
+    // Special check for product 68f36177f6edd352f8920e1d
+    if (productId === "68f36177f6edd352f8920e1d") {
+      // First check aspect ratio (190% limit), then perimeter
+      const perimeter = (width + height) * 2;
+      // First, ensure flaps is 2 if ratio > 50%
+      if (customOrderData.flaps === 1 && (widthRatio > 1.5 || heightRatio > 1.5)) {
+        // Auto-switch to 2 flaps
+        onDataChange({
+          ...customOrderData,
+          flaps: 2
+        });
+        // Continue with calculation using flaps = 2
+        // (will be recalculated after state update, but also calculate now)
+        const newPerimeter = (width + height) * 2;
+        // Check 2-flap ratio limit (190% = 2.9) - no perimeter limit for this product
+        if (widthRatio <= 2.9 && heightRatio <= 2.9) {
+          const specialPrice = getSpecialPricingForProduct(productId, newPerimeter, 2, isCeilingInstallation);
+          if (specialPrice !== null) {
+            const priceUZS = convertUSDToUZS(specialPrice);
+            setCalculatedPrice(priceUZS);
+            setIsPriceCalculated(true);
+            setLastCalculatedDimensions({ width: customOrderData.width, height: customOrderData.height });
+            if (onPriceCalculated) {
+              onPriceCalculated(priceUZS, true);
+            }
+          }
+        } else {
+          // Ratio exceeds 190% even with 2 flaps
+          setShowLimitModal(true);
+        }
+        return;
       }
-      onDataChange({
-        width: resetWidth,
-        height: resetHeight,
-        flaps: customOrderData.flaps,
-        quantity: customOrderData.quantity
-      });
-      setShowLimitModal(true);
-      return;
+      
+      // For double-flap: check 190% limit (2.9x)
+      // Note: No perimeter limit check for this product - aspect ratio 190% is the only limit
+      // This allows 100x290 (perimeter 780) as long as ratio <= 190%
+      if (customOrderData.flaps === 2) {
+        if (widthRatio > 2.9 || heightRatio > 2.9) {
+          setShowLimitModal(true);
+          return;
+        }
+      }
+      
+      // For single-flap with ratio <= 50%, continue normally (shouldn't happen due to useEffect, but just in case)
+    } else {
+      // Check if aspect ratio exceeds 170% for other products (170% = 2.7x)
+      if (widthRatio > 2.7 || heightRatio > 2.7) {
+        // Reset values to minimum size based on product when showing modal
+        let resetWidth = "15";
+        let resetHeight = "15";
+        if (productId === "68ff560a5c85e742c1891de5") {
+          resetWidth = "20";
+          resetHeight = "30";
+        } else if (productId === "69006228bafc5fb7b6d2a888") {
+          resetWidth = "15";
+          resetHeight = "15";
+        } else if (productId === "68f36177f6edd352f8920e1f") {
+          resetWidth = "25";
+          resetHeight = "25";
+        }
+        onDataChange({
+          width: resetWidth,
+          height: resetHeight,
+          flaps: customOrderData.flaps,
+          quantity: customOrderData.quantity
+        });
+        setShowLimitModal(true);
+        return;
+      }
     }
 
     // If all conditions are met, calculate and show the price
@@ -255,7 +326,7 @@ export function CustomOrderForm({
   const getMinWidth = () => {
     if (productId === "68ff560a5c85e742c1891de5") return 20;
     if (productId === "69006228bafc5fb7b6d2a888") return 15;
-    if (productId === "68f36177f6edd352f8920e1d") return 15;
+    if (productId === "68f36177f6edd352f8920e1d") return 30;
     if (productId === "68f36177f6edd352f8920e1f") return 25;
     return 15;
   };
@@ -263,7 +334,7 @@ export function CustomOrderForm({
   const getMinHeight = () => {
     if (productId === "68ff560a5c85e742c1891de5") return 30;
     if (productId === "69006228bafc5fb7b6d2a888") return 15;
-    if (productId === "68f36177f6edd352f8920e1d") return 15;
+    if (productId === "68f36177f6edd352f8920e1d") return 30;
     if (productId === "68f36177f6edd352f8920e1f") return 25;
     return 15;
   };
@@ -929,7 +1000,7 @@ export function CustomOrderForm({
                   : productId === "69006228bafc5fb7b6d2a888"
                   ? "Минимальный размер 15x15 см"
                   : productId === "68f36177f6edd352f8920e1d"
-                  ? "Минимальный размер 15x15 см"
+                  ? "Минимальный размер 30x30 см"
                   : productId === "68f36177f6edd352f8920e1f"
                   ? "Минимальный размер 25x25 см"
                   : t("cfg.minSizeTitle")}
@@ -943,7 +1014,7 @@ export function CustomOrderForm({
                 : productId === "69006228bafc5fb7b6d2a888"
                 ? "Размеры должны быть не менее: ширина 15 см, высота 15 см. Пожалуйста, введите корректные размеры."
                 : productId === "68f36177f6edd352f8920e1d"
-                ? "Размеры должны быть не менее: ширина 15 см, высота 15 см. Пожалуйста, введите корректные размеры."
+                ? "Размеры должны быть не менее: ширина 30 см, высота 30 см. Пожалуйста, введите корректные размеры."
                 : productId === "68f36177f6edd352f8920e1f"
                 ? "Размеры должны быть не менее: ширина 25 см, высота 25 см. Пожалуйста, введите корректные размеры."
                 : t("cfg.minSizeDesc")}

@@ -59,19 +59,19 @@ const SPECIAL_PRICING_RULES: Record<string, PricingRule[]> = {
     { maxPerimeter: 360, priceUSD: 125, allowedFlaps: [2] },
   ],
   "68f36177f6edd352f8920e1d": [
-    { maxPerimeter: 120, priceUSD: 32, allowedFlaps: [1, 2] },
-    { maxPerimeter: 160, priceUSD: 44, allowedFlaps: [1, 2] },
-    { maxPerimeter: 200, priceUSD: 50, allowedFlaps: [1, 2] },
-    { maxPerimeter: 240, priceUSD: 53, allowedFlaps: [1, 2] },
-    { maxPerimeter: 280, priceUSD: 61, allowedFlaps: [1, 2] },
-    { maxPerimeter: 320, priceUSD: 71, allowedFlaps: [1, 2] },
-    { maxPerimeter: 360, priceUSD: 81, allowedFlaps: [1, 2] },
-    { maxPerimeter: 400, priceUSD: 93, allowedFlaps: [1, 2] },
-    { maxPerimeter: 440, priceUSD: 108, allowedFlaps: [1, 2] },
-    { maxPerimeter: 480, priceUSD: 118, allowedFlaps: [1, 2] },
-    { maxPerimeter: 520, priceUSD: 131, allowedFlaps: [1, 2] },
-    { maxPerimeter: 560, priceUSD: 143, allowedFlaps: [1, 2] },
-    { maxPerimeter: 600, priceUSD: 156, allowedFlaps: [1, 2] },
+    { maxPerimeter: 120, priceUSD: 35, allowedFlaps: [1, 2] },
+    { maxPerimeter: 160, priceUSD: 38, allowedFlaps: [1, 2] },
+    { maxPerimeter: 200, priceUSD: 41, allowedFlaps: [1, 2] },
+    { maxPerimeter: 240, priceUSD: 45, allowedFlaps: [1, 2] },
+    { maxPerimeter: 280, priceUSD: 50, allowedFlaps: [1, 2] },
+    { maxPerimeter: 320, priceUSD: 55, allowedFlaps: [1, 2] },
+    { maxPerimeter: 360, priceUSD: 60, allowedFlaps: [1, 2] },
+    { maxPerimeter: 400, priceUSD: 65, allowedFlaps: [1, 2] },
+    { maxPerimeter: 440, priceUSD: 70, allowedFlaps: [1, 2] },
+    { maxPerimeter: 480, priceUSD: 75, allowedFlaps: [1, 2] },
+    { maxPerimeter: 520, priceUSD: 80, allowedFlaps: [1, 2] },
+    { maxPerimeter: 560, priceUSD: 85, allowedFlaps: [1, 2] },
+    { maxPerimeter: 600, priceUSD: 120, allowedFlaps: [2] },
   ],
   // Add more product IDs here as needed
   // "another-product-id": [...],
@@ -135,29 +135,28 @@ export const getSpecialPricingForProduct = (productId: string, perimeter: number
       }
     }
   } else if (productId === "68f36177f6edd352f8920e1d") {
-    // Add $3 for ceiling installation on perimeter >= 280
-    if (isCeilingInstallation && perimeter >= 280) {
-      priceUSD = priceUSD + 3;
-    }
     // Add percentage surcharge for 2-door option based on perimeter
-    // Price only changes for flaps after 160cm perimeter
-    if (flaps === 2 && perimeter > 160) {
+    if (flaps === 2) {
       if (perimeter <= 200) {
-        priceUSD = priceUSD * 1.7; // +70%
-      } else if (perimeter <= 240) {
-        priceUSD = priceUSD * 1.67; // +67%
+        priceUSD = priceUSD * 1.5; // +50%
       } else if (perimeter <= 280) {
-        priceUSD = priceUSD * 1.51; // +51%
+        priceUSD = priceUSD * 1.4; // +40%
       } else if (perimeter <= 320) {
-        priceUSD = priceUSD * 1.42; // +42%
+        priceUSD = priceUSD * 1.4; // +40%
       } else if (perimeter <= 360) {
-        priceUSD = priceUSD * 1.31; // +31%
+        priceUSD = priceUSD * 1.35; // +35%
       } else if (perimeter <= 400) {
-        priceUSD = priceUSD * 1.2; // +20%
-      } else {
-        // 440, 480, 520, 560, 600
-        priceUSD = priceUSD * 1.1; // +10%
+        priceUSD = priceUSD * 1.35; // +35%
+      } else if (perimeter <= 440) {
+        priceUSD = priceUSD * 1.35; // +35%
+      } else if (perimeter <= 480) {
+        priceUSD = priceUSD * 1.35; // +35%
+      } else if (perimeter <= 520) {
+        priceUSD = priceUSD * 1.35; // +35%
+      } else if (perimeter <= 560) {
+        priceUSD = priceUSD * 1.35; // +35%
       }
+      // For 600, the price is already set to 120 (no additional surcharge needed)
     }
   } else if (productId === "68ff560a5c85e742c1891de5") {
     // Add percentage surcharge for 2-door option based on perimeter
@@ -233,29 +232,28 @@ export const getSpecialPricingInfo = (productId: string, perimeter: number, flap
       }
     }
   } else if (productId === "68f36177f6edd352f8920e1d") {
-    // Add $3 for ceiling installation on perimeter >= 280
-    if (isCeilingInstallation && perimeter >= 280) {
-      priceUSD = priceUSD + 3;
-    }
     // Add percentage surcharge for 2-door option based on perimeter
-    // Price only changes for flaps after 160cm perimeter
-    if (flaps === 2 && perimeter > 160) {
+    if (flaps === 2) {
       if (perimeter <= 200) {
-        priceUSD = priceUSD * 1.7; // +70%
-      } else if (perimeter <= 240) {
-        priceUSD = priceUSD * 1.67; // +67%
+        priceUSD = priceUSD * 1.5; // +50%
       } else if (perimeter <= 280) {
-        priceUSD = priceUSD * 1.51; // +51%
+        priceUSD = priceUSD * 1.4; // +40%
       } else if (perimeter <= 320) {
-        priceUSD = priceUSD * 1.42; // +42%
+        priceUSD = priceUSD * 1.4; // +40%
       } else if (perimeter <= 360) {
-        priceUSD = priceUSD * 1.31; // +31%
+        priceUSD = priceUSD * 1.35; // +35%
       } else if (perimeter <= 400) {
-        priceUSD = priceUSD * 1.2; // +20%
-      } else {
-        // 440, 480, 520, 560, 600
-        priceUSD = priceUSD * 1.1; // +10%
+        priceUSD = priceUSD * 1.35; // +35%
+      } else if (perimeter <= 440) {
+        priceUSD = priceUSD * 1.35; // +35%
+      } else if (perimeter <= 480) {
+        priceUSD = priceUSD * 1.35; // +35%
+      } else if (perimeter <= 520) {
+        priceUSD = priceUSD * 1.35; // +35%
+      } else if (perimeter <= 560) {
+        priceUSD = priceUSD * 1.35; // +35%
       }
+      // For 600, the price is already set to 120 (no additional surcharge needed)
     }
   } else if (productId === "68ff560a5c85e742c1891de5") {
     // Add percentage surcharge for 2-door option based on perimeter
@@ -355,13 +353,22 @@ export const getAllowedFlaps = (productId: string, perimeter: number, width?: nu
     // Fallback to [1, 2] if dimensions not provided
     return [1, 2];
   } else if (productId === "68f36177f6edd352f8920e1d") {
-    // Use 40% rule based on dimensions (same as 69006228bafc5fb7b6d2a888)
+    // Use 50% rule based on dimensions
+    // For perimeter > 600, only 2 flaps allowed (mandatory double-sided)
+    if (perimeter > 600) {
+      return [2];
+    }
+    // For perimeter 560-600, only 2 flaps allowed (mandatory double-sided)
+    if (perimeter > 560 && perimeter <= 600) {
+      return [2];
+    }
+    
     if (width !== undefined && height !== undefined && width > 0 && height > 0) {
       const widthRatio = width / height;
       const heightRatio = height / width;
       
-      // If width or height exceeds the other by more than 40%, force 2 flaps
-      if (widthRatio > 1.4 || heightRatio > 1.4) {
+      // If width or height exceeds the other by more than 50%, force 2 flaps
+      if (widthRatio > 1.5 || heightRatio > 1.5) {
         return [2];
       } else {
         // Otherwise, allow choice between 1 and 2 flaps
@@ -398,7 +405,7 @@ export const getMaxPerimeterForProduct = (productId: string): number => {
   } else if (productId === "69006228bafc5fb7b6d2a888") {
     return 600;
   } else if (productId === "68f36177f6edd352f8920e1d") {
-    return 600;
+    return 800; // Increased to allow 100x290 (perimeter 780) with 190% ratio
   }
   return 800; // Default
 };

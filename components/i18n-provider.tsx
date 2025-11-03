@@ -641,7 +641,7 @@ const uz: Messages = {
   "cfg.doubleFlap": "Ikki qanotli",
   "cfg.priceLabel": "Narx:",
   "cfg.calculate": "Hisoblash",
-  "cfg.dimensionsExceededTitle": "Ruxsat etilgan o'lchamlar oshib ketdi",
+  "cfg.dimensionsExceededTitle": "O'lchamlar oshib ketdi",
   "cfg.dimensionsExceededDesc": "Buyurtma imkonsiz. Ishlab chiqarish bilan bog'laning.",
   "cfg.minSizeTitle": "Minimal o'lcham 15x15 sm",
   "cfg.minSizeDesc": "O'lchamlar kamida 15x15 sm bo'lishi kerak. Iltimos, to'g'ri o'lchamlarni kiriting.",
