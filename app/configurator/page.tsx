@@ -22,6 +22,8 @@ function ConfiguratorContent() {
   const product = productIdParam ? getProductById(productIdParam) : null
   const localizedProduct = product ? getLocalizedProduct(product, currentLanguage) : null
 
+  //test
+
   useEffect(() => {
     setIsMounted(true)
   }, [currentLanguage])
