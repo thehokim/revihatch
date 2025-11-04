@@ -54,12 +54,37 @@ export function CustomOrderForm({
       const height = Number(customOrderData.height);
       
       if (productId === "69006228bafc5fb7b6d2a888" && Number.isFinite(width) && Number.isFinite(height) && width > 0 && height > 0) {
-        // Use 40% rule for this specific product
-        const widthRatio = width / height;
-        const heightRatio = height / width;
+        const perimeter = (width + height) * 2;
         
-        // If width or height exceeds the other by more than 40%, force 2 flaps
-        if (widthRatio > 1.4 || heightRatio > 1.4) {
+        // Rules for 69006228bafc5fb7b6d2a888:
+        // - До 160: только одностворчатая [1]
+        // - С 161 до 600: выбор между 1 и 2 створками [1, 2], НО если превышает 40%, автоматически становится 2х створчатым [2]
+        
+        if (perimeter <= 160) {
+          // До 160: только одностворчатая
+          if (customOrderData.flaps !== 1) {
+            onDataChange({
+              ...customOrderData,
+              flaps: 1
+            });
+          }
+        } else if (perimeter <= 600) {
+          // С 161 до 600: проверяем правило 40%
+          const widthRatio = width / height;
+          const heightRatio = height / width;
+          
+          // Если превышает 40%, автоматически становится 2х створчатым
+          if (widthRatio > 1.4 || heightRatio > 1.4) {
+            if (customOrderData.flaps !== 2) {
+              onDataChange({
+                ...customOrderData,
+                flaps: 2
+              });
+            }
+          }
+          // Если не превышает 40%, разрешаем выбор между 1 и 2 (не принуждаем)
+        } else {
+          // После 600: только 2 створки
           if (customOrderData.flaps !== 2) {
             onDataChange({
               ...customOrderData,
@@ -72,29 +97,99 @@ export function CustomOrderForm({
       if (productId === "68f36177f6edd352f8920e1d" && Number.isFinite(width) && Number.isFinite(height) && width > 0 && height > 0) {
         const perimeter = (width + height) * 2;
         
-        // If perimeter > 600, force 2 flaps (mandatory double-sided)
-        if (perimeter > 600) {
+        // Check 50% rule: if width or height exceeds the other by more than 50%, force 2 flaps
+        const widthRatio = width / height;
+        const heightRatio = height / width;
+        const exceeds50Percent = widthRatio > 1.5 || heightRatio > 1.5;
+        
+        // Flap rules for 68f36177f6edd352f8920e1d based on perimeter and 50% rule:
+        // - Up to 160: only 1 flap allowed (mandatory single), ignore 50% rule
+        // - 161-560: choice between 1 and 2 flaps, but if 50% rule applies, force 2 flaps
+        // - 561+ (including 600+): only 2 flaps allowed (mandatory double)
+        if (perimeter <= 160) {
+          // Force 1 flap for perimeter <= 160 (ignore 50% rule)
+          if (customOrderData.flaps !== 1) {
+            onDataChange({
+              ...customOrderData,
+              flaps: 1
+            });
+          }
+        } else if (perimeter > 560) {
+          // Force 2 flaps for perimeter > 560
           if (customOrderData.flaps !== 2) {
             onDataChange({
               ...customOrderData,
               flaps: 2
             });
           }
-        } else {
-          // Use 50% rule for this specific product
-          const widthRatio = width / height;
-          const heightRatio = height / width;
-          
-          // If width or height exceeds the other by more than 50%, force 2 flaps
-          if (widthRatio > 1.5 || heightRatio > 1.5) {
-            if (customOrderData.flaps !== 2) {
-              onDataChange({
-                ...customOrderData,
-                flaps: 2
-              });
-            }
+        } else if (exceeds50Percent) {
+          // For 161-560, if 50% rule applies, force 2 flaps
+          if (customOrderData.flaps !== 2) {
+            onDataChange({
+              ...customOrderData,
+              flaps: 2
+            });
           }
         }
+        // For 161-560 without 50% rule violation, allow choice between 1 and 2 flaps (no forced change)
+      }
+      
+      // Special logic for product 68f36177f6edd352f8920e1f
+      if (productId === "68f36177f6edd352f8920e1f" && Number.isFinite(width) && Number.isFinite(height) && width > 0 && height > 0) {
+        const perimeter = (width + height) * 2;
+        
+        // Rules for 68f36177f6edd352f8920e1f:
+        // - До 400: только одностворчатое [1]
+        // - С 401 до 480: выбор створок [1, 2], если выбрать 2х ств то +40% на цену
+        // - С 481 до 720: только 2х ств обязательно [2]
+        // - После 720: также только 2х ств [2]
+        if (perimeter <= 400) {
+          // До 400: только одностворчатое
+          if (customOrderData.flaps !== 1) {
+            onDataChange({
+              ...customOrderData,
+              flaps: 1
+            });
+          }
+        } else if (perimeter > 480) {
+          // С 481 и выше: только 2х ств обязательно
+          if (customOrderData.flaps !== 2) {
+            onDataChange({
+              ...customOrderData,
+              flaps: 2
+            });
+          }
+        }
+        // Для 401-480 разрешаем выбор между 1 и 2 створками (не принуждаем)
+      }
+      
+      // Special logic for product 68ff560a5c85e742c1891de5
+      if (productId === "68ff560a5c85e742c1891de5" && Number.isFinite(width) && Number.isFinite(height) && width > 0 && height > 0) {
+        const perimeter = (width + height) * 2;
+        
+        // Rules for 68ff560a5c85e742c1891de5:
+        // - До 160: только одностворчатая [1]
+        // - С 161 до 280: выбор между 1 и 2 створками [1, 2]
+        // - С 281 до 360: обязательно 2-створчатая [2]
+        // - После 360: также обязательно 2-створчатая [2]
+        if (perimeter <= 160) {
+          // До 160: только одностворчатая
+          if (customOrderData.flaps !== 1) {
+            onDataChange({
+              ...customOrderData,
+              flaps: 1
+            });
+          }
+        } else if (perimeter > 280) {
+          // С 281 и выше: обязательно 2-створчатая
+          if (customOrderData.flaps !== 2) {
+            onDataChange({
+              ...customOrderData,
+              flaps: 2
+            });
+          }
+        }
+        // Для 161-280 разрешаем выбор между 1 и 2 створками (не принуждаем)
       }
       
       const perimeter = Number.isFinite(width) && Number.isFinite(height) ? (width + height) * 2 : 0;
@@ -141,11 +236,55 @@ export function CustomOrderForm({
     prevFlapsRef.current = customOrderData.flaps;
   }, [customOrderData.flaps, productId, isPriceCalculated, onPriceCalculated, isSpecialProduct]);
 
+  // Auto-recalculate price when installation type changes (if price was already calculated)
+  useEffect(() => {
+    if (isSpecialProduct(productId) && isPriceCalculated && isCeilingInstallation !== undefined) {
+      const width = Number(customOrderData.width);
+      const height = Number(customOrderData.height);
+      
+      // Only recalculate if dimensions are valid
+      if (Number.isFinite(width) && Number.isFinite(height) && width > 0 && height > 0) {
+        const perimeter = (width + height) * 2;
+        const specialPrice = getSpecialPricingForProduct(productId, perimeter, customOrderData.flaps, isCeilingInstallation);
+        
+        if (specialPrice !== null) {
+          const priceUZS = convertUSDToUZS(specialPrice);
+          setCalculatedPrice(priceUZS);
+          // Notify parent component about calculated price
+          if (onPriceCalculated) {
+            onPriceCalculated(priceUZS, true);
+          }
+        }
+      }
+    }
+  }, [isCeilingInstallation, productId, isPriceCalculated, customOrderData.width, customOrderData.height, customOrderData.flaps, convertUSDToUZS, onPriceCalculated, isSpecialProduct]);
+
+  // Update order state when quantity changes
+  useEffect(() => {
+    if (onPriceCalculated) {
+      if (customOrderData.quantity <= 0) {
+        // If quantity is 0 or less, reset order state
+        onPriceCalculated(0, false);
+      } else if (isPriceCalculated && calculatedPrice > 0) {
+        // If quantity is positive and price was calculated, keep order state
+        onPriceCalculated(calculatedPrice, true);
+      }
+    }
+  }, [customOrderData.quantity, onPriceCalculated, isPriceCalculated, calculatedPrice]);
+
   const handleWidthChange = (value: string) => {
     onDataChange({
       ...customOrderData,
       width: value,
     });
+    // Reset price when dimensions change
+    if (isPriceCalculated) {
+      setCalculatedPrice(0);
+      setIsPriceCalculated(false);
+      if (onPriceCalculated) {
+        onPriceCalculated(0, false);
+      }
+    }
   };
 
   const handleHeightChange = (value: string) => {
@@ -153,6 +292,14 @@ export function CustomOrderForm({
       ...customOrderData,
       height: value,
     });
+    // Reset price when dimensions change
+    if (isPriceCalculated) {
+      setCalculatedPrice(0);
+      setIsPriceCalculated(false);
+      if (onPriceCalculated) {
+        onPriceCalculated(0, false);
+      }
+    }
   };
 
   const handleFlapsChange = (flaps: number) => {
@@ -160,6 +307,14 @@ export function CustomOrderForm({
       ...customOrderData,
       flaps,
     });
+    // Reset price when flaps change
+    if (isPriceCalculated) {
+      setCalculatedPrice(0);
+      setIsPriceCalculated(false);
+      if (onPriceCalculated) {
+        onPriceCalculated(0, false);
+      }
+    }
   };
 
   // Handle blur event for dimension inputs - check and swap if needed
@@ -170,8 +325,11 @@ export function CustomOrderForm({
       const height = Number(customOrderData.height);
       
       if (Number.isFinite(width) && Number.isFinite(height) && width > 0 && height > 0) {
-        // For double flaps (2 створки), height cannot exceed width * 0.55
-        if (customOrderData.flaps === 2 && height > width * 0.55) {
+        // For double flaps (2 створки), height cannot be less than width * 0.55
+        // If width is 200cm, height cannot be less than 110cm
+        // Example: 200x110 is allowed, 200x109 is not allowed
+        const minHeight = width * 0.55;
+        if (customOrderData.flaps === 2 && height < minHeight) {
           // Show warning modal
           setShowDoubleFlapsHeightLimitModal(true);
           return;
@@ -184,6 +342,14 @@ export function CustomOrderForm({
             width: String(height),
             height: String(width)
           });
+          // Reset price when dimensions are swapped
+          if (isPriceCalculated) {
+            setCalculatedPrice(0);
+            setIsPriceCalculated(false);
+            if (onPriceCalculated) {
+              onPriceCalculated(0, false);
+            }
+          }
         }
       }
     }
@@ -216,12 +382,35 @@ export function CustomOrderForm({
       return;
     }
     
-    // Special check for product 68f36177f6edd352f8920e1f with 2 flaps
-    // Height cannot exceed width * 0.55 (height cannot exceed width by more than -45%)
-    if (productId === "68f36177f6edd352f8920e1f" && customOrderData.flaps === 2) {
-      if (height > width * 0.55) {
-        setShowDoubleFlapsHeightLimitModal(true);
-        return;
+    // Special checks for product 68f36177f6edd352f8920e1f
+    if (productId === "68f36177f6edd352f8920e1f") {
+      // Rule: Height cannot exceed width by more than 30%. If exceeds, swap width and height
+      if (height > width * 1.3) {
+        onDataChange({
+          ...customOrderData,
+          width: String(height),
+          height: String(width)
+        });
+        // Reset price when dimensions are swapped - user needs to recalculate
+        if (isPriceCalculated) {
+          setCalculatedPrice(0);
+          setIsPriceCalculated(false);
+          if (onPriceCalculated) {
+            onPriceCalculated(0, false);
+          }
+        }
+        return; // Stop calculation - user needs to click calculate again
+      }
+      
+      // For 2 flaps: Height cannot be less than width * 0.55
+      // If width is 200cm, height cannot be less than 110cm (minimum height requirement)
+      // Example: 200x110 is allowed, 200x109 is not allowed
+      if (customOrderData.flaps === 2) {
+        const minHeight = width * 0.55;
+        if (height < minHeight) {
+          setShowDoubleFlapsHeightLimitModal(true);
+          return;
+        }
       }
     }
     
@@ -428,14 +617,26 @@ export function CustomOrderForm({
                   x2={rectX + rectWidth}
                   y2={rectY + rectHeight / 2}
                   stroke={
-                    productId === "68f36177f6edd352f8920e1f"
+                    productId === "68f36177f6edd352f8920e1d" && customOrderData.flaps === 2
+                      ? "#999"
+                      : productId === "68f36177f6edd352f8920e1f"
+                      ? "#999"
+                      : productId === "68ff560a5c85e742c1891de5" && customOrderData.flaps === 2
+                      ? "#999"
+                      : productId === "69006228bafc5fb7b6d2a888" && customOrderData.flaps === 2
                       ? "#999"
                       : customOrderData.flaps === 2
                       ? "#000"
                       : "#999"
                   }
                   strokeWidth={
-                    productId === "68f36177f6edd352f8920e1f"
+                    productId === "68f36177f6edd352f8920e1d" && customOrderData.flaps === 2
+                      ? "2"
+                      : productId === "68f36177f6edd352f8920e1f"
+                      ? "2"
+                      : productId === "68ff560a5c85e742c1891de5" && customOrderData.flaps === 2
+                      ? "2"
+                      : productId === "69006228bafc5fb7b6d2a888" && customOrderData.flaps === 2
                       ? "2"
                       : customOrderData.flaps === 2
                       ? "3"
@@ -996,13 +1197,13 @@ export function CustomOrderForm({
               </div>
               <DialogTitle className="text-xl font-bold text-gray-900">
                 {productId === "68ff560a5c85e742c1891de5" 
-                  ? "Минимальный размер 20x30 см"
+                  ? t("cfg.minSizeTitle20x30")
                   : productId === "69006228bafc5fb7b6d2a888"
-                  ? "Минимальный размер 15x15 см"
+                  ? t("cfg.minSizeTitle15x15")
                   : productId === "68f36177f6edd352f8920e1d"
-                  ? "Минимальный размер 30x30 см"
+                  ? t("cfg.minSizeTitle30x30")
                   : productId === "68f36177f6edd352f8920e1f"
-                  ? "Минимальный размер 25x25 см"
+                  ? t("cfg.minSizeTitle25x25")
                   : t("cfg.minSizeTitle")}
               </DialogTitle>
             </div>
@@ -1010,13 +1211,13 @@ export function CustomOrderForm({
           <div className="pt-4">
             <p className="text-gray-700 text-base leading-relaxed">
               {productId === "68ff560a5c85e742c1891de5"
-                ? "Размеры должны быть не менее: ширина 20 см, высота 30 см. Пожалуйста, введите корректные размеры."
+                ? t("cfg.minSizeDesc20x30")
                 : productId === "69006228bafc5fb7b6d2a888"
-                ? "Размеры должны быть не менее: ширина 15 см, высота 15 см. Пожалуйста, введите корректные размеры."
+                ? t("cfg.minSizeDesc15x15")
                 : productId === "68f36177f6edd352f8920e1d"
-                ? "Размеры должны быть не менее: ширина 30 см, высота 30 см. Пожалуйста, введите корректные размеры."
+                ? t("cfg.minSizeDesc30x30")
                 : productId === "68f36177f6edd352f8920e1f"
-                ? "Размеры должны быть не менее: ширина 25 см, высота 25 см. Пожалуйста, введите корректные размеры."
+                ? t("cfg.minSizeDesc25x25")
                 : t("cfg.minSizeDesc")}
             </p>
             <Button 

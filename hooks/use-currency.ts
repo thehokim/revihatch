@@ -61,7 +61,6 @@ export function useCurrency() {
         throw new Error("Invalid data format received from API");
       }
     } catch (error) {
-      console.error("Failed to fetch currency rate:", error);
       
       const errorData: CurrencyData = {
         rate: FALLBACK_RATE,

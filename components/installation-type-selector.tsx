@@ -15,7 +15,7 @@ export function InstallationTypeSelector({
 
   return (
     <div>
-      <h3 className="text-lg font-bold text-black mb-4">
+      <h3 className="text-sm font-semibold text-gray-700 mb-4">
         {t("cfg.installationType")}
       </h3>
       <div className="grid grid-cols-2 gap-3">

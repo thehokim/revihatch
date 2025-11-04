@@ -5,37 +5,47 @@ import { ArrowRight, Plus } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { useI18n } from "@/components/i18n-provider"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { useProducts } from "@/hooks/use-products"
-import { SupportedLanguage } from "@/lib/types"
 
 export function Hero() {
   const { t, lang } = useI18n() as any
   const router = useRouter()
   const [hoveredHatch, setHoveredHatch] = useState<number | null>(null)
-  const [isTransitioning, setIsTransitioning] = useState(false)
   const [clickedHatch, setClickedHatch] = useState<number | null>(null)
-  
-  const currentLanguage = lang === 'uz' ? 'uz' : 'ru' as SupportedLanguage
-  const { products, getProductByCategory } = useProducts(currentLanguage)
+  const [mounted, setMounted] = useState(false)
 
-  const hatchCategoryMap: Record<number, string> = {
-    1: "transformer",
-    2: "anodos",
-    3: "anodos",
-    4: "napolny"
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const hatchConfig: Record<number, { productId: string; nameUz: string; nameRu: string }> = {
+    1: {
+      productId: "69006228bafc5fb7b6d2a888",
+      nameUz: "Bo'yoq ostidagi alyumin lyuk",
+      nameRu: "Люк алюминиевый под малярку"
+    },
+    2: {
+      productId: "68ff560a5c85e742c1891de5",
+      nameUz: "Devor lyuki \"Transformer\"",
+      nameRu: "Люк настенный \"Трансформер\""
+    },
+    3: {
+      productId: "68f36177f6edd352f8920e1d",
+      nameUz: "Devor lyuki «Universal»",
+      nameRu: "Люк настенный «Универсал»"
+    },
+    4: {
+      productId: "68f36177f6edd352f8920e1f",
+      nameUz: "Pol lyuki",
+      nameRu: "Напольный люк"
+    }
   }
   
   const handleHatchClick = (hatchId: number) => {
-    const category = hatchCategoryMap[hatchId]
-    if (category) {
-      const product = getProductByCategory(category)
-      if (product) {
-        router.push(`/configurator?id=${product._id}`)
-      } else {
-        router.push(`/configurator?model=${category}`)
-      }
+    const config = hatchConfig[hatchId]
+    if (config) {
+      router.push(`/configurator?id=${config.productId}`)
     }
   }
   
@@ -52,25 +62,25 @@ export function Hero() {
   const hatches = [
     {
       id: 1,
-      name: t("hero.hatches.paint"),
+      name: mounted ? (lang === "uz" ? hatchConfig[1].nameUz : hatchConfig[1].nameRu) : hatchConfig[1].nameRu,
       image: "/5.png",
       position: "top-[25%] left-[20%]"
     },
     {
       id: 2,
-      name: t("hero.hatches.wall"),
+      name: mounted ? (lang === "uz" ? hatchConfig[2].nameUz : hatchConfig[2].nameRu) : hatchConfig[2].nameRu,
       image: "/4.png", 
       position: "top-[42%] left-[20%]"
     },
     {
       id: 3,
-      name: t("hero.hatches.tile"),
+      name: mounted ? (lang === "uz" ? hatchConfig[3].nameUz : hatchConfig[3].nameRu) : hatchConfig[3].nameRu,
       image: "/3.png",
       position: "top-[60%] left-[20%]"
     },
     {
       id: 4,
-      name: t("hero.hatches.floor"),
+      name: mounted ? (lang === "uz" ? hatchConfig[4].nameUz : hatchConfig[4].nameRu) : hatchConfig[4].nameRu,
       image: "/2.png",
       position: "top-[75%] left-[20%]"
     }
@@ -87,13 +97,13 @@ export function Hero() {
         <div className="flex flex-col lg:flex-row items-center gap-8 sm:gap-10 md:gap-12 lg:gap-16 xl:gap-20">
           <div className="space-y-6 sm:space-y-8 md:space-y-10 w-full lg:w-auto lg:flex-1 lg:max-w-2xl">
 
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-[1.1] tracking-tight" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700 }}>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-[1.1] tracking-tight" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700 }} suppressHydrationWarning>
               <span className="block">{t("hero.title1")}</span>
               <span className="block">{t("hero.title2")}</span>
               <span className="block">{t("hero.title3")}</span>
             </h1>
 
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4" suppressHydrationWarning>
               <Button size="lg" className="group bg-white text-gray-800 hover:bg-gray-100 border border-gray-300 rounded-lg px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base" asChild>
                 <Link href="/configurator">
                   {t("hero.configurator")}
@@ -108,6 +118,7 @@ export function Hero() {
 
           <div className="relative flex justify-end items-center w-full lg:w-auto lg:flex-shrink-0">
             <div className="relative w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl">
+              {/* Base image */}
               <Image
                 src="/Herolyuk.png"
                 alt="3D модель угла комнаты с люком"
@@ -117,38 +128,27 @@ export function Hero() {
                 priority
               />
               
-              {hoveredHatch && (
+              {/* Overlay images - pre-rendered for instant switching */}
+              {hatches.map((hatch) => (
                 <Image
-                  src={hatches.find(h => h.id === hoveredHatch)?.image || "/Herolyuk.png"}
+                  key={hatch.id}
+                  src={hatch.image}
                   alt="3D модель угла комнаты с люком"
                   width={1200}
                   height={1200}
-                  className="absolute inset-0 w-full h-auto object-contain animate-fade-in image-overlay"
+                  className={`absolute inset-0 w-full h-auto object-contain transition-opacity duration-200 ${
+                    hoveredHatch === hatch.id ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                  }`}
+                  loading="eager"
                 />
-              )}
+              ))}
               
               {hatches.map((hatch) => (
                 <div
                   key={hatch.id}
                   className={`absolute ${hatch.position} z-10`}
-                  onMouseEnter={() => {
-                    if (!isTransitioning) {
-                      setIsTransitioning(true)
-                      setTimeout(() => {
-                        setHoveredHatch(hatch.id)
-                        setIsTransitioning(false)
-                      }, 50)
-                    }
-                  }}
-                  onMouseLeave={() => {
-                    if (!isTransitioning) {
-                      setIsTransitioning(true)
-                      setTimeout(() => {
-                        setHoveredHatch(null)
-                        setIsTransitioning(false)
-                      }, 50)
-                    }
-                  }}
+                  onMouseEnter={() => setHoveredHatch(hatch.id)}
+                  onMouseLeave={() => setHoveredHatch(null)}
                   onClick={() => handleHatchClick(hatch.id)}
                 >
                   <div className="relative group cursor-pointer">
@@ -158,9 +158,9 @@ export function Hero() {
                       <Plus className="w-4 h-4 text-white" />
                     </div>
                     
-                    <div className={`absolute right-16 top-1/2 -translate-y-1/2 bg-[#2D2D2D] border border-white/50 text-white px-4 py-2 rounded-lg text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none hidden md:block ${
+                    <div className={`absolute right-16 top-1/2 -translate-y-1/2 bg-[#2D2D2D] border border-white/50 text-white px-4 py-2 rounded-lg text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none hidden md:block ${
                       hoveredHatch === hatch.id ? 'opacity-100' : ''
-                    }`}>
+                    }`} suppressHydrationWarning>
                       {hatch.name}
                       <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-[7px] w-3 h-3 bg-[#2D2D2D] border-t border-r border-white/50 rotate-45"></div>
                     </div>

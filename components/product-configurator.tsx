@@ -137,6 +137,14 @@ export function ProductConfigurator({ productId }: ProductConfiguratorProps) {
     }
   }, [showCustomOrder, productId]);
 
+  // Reset custom order state when quantity becomes 0
+  useEffect(() => {
+    if (customOrderData.quantity <= 0) {
+      setHasCustomOrder(false);
+      setCustomOrderPrice(0);
+    }
+  }, [customOrderData.quantity]);
+
   const getCurrentProduct = () => {
     if (product) {
       const localized = getLocalizedProduct(product, currentLanguage);
@@ -335,7 +343,8 @@ export function ProductConfigurator({ productId }: ProductConfiguratorProps) {
       // For custom orders, use priceUSD and convert dynamically
       priceUSD = selectedSizeData.priceUSD;
 
-      if (product?.category === "anodos" && isCeilingInstallation) {
+      // Add $3 for ceiling installation (universal rule for all products)
+      if (isCeilingInstallation) {
         priceUSD = priceUSD + 3;
       }
     }
@@ -344,8 +353,8 @@ export function ProductConfigurator({ productId }: ProductConfiguratorProps) {
     if (selectedSizeData && !useCustomSize && !usePerimeterPricing && !showCustomOrder) {
       let finalPriceUZS = selectedSizeData.priceUZS;
       
-      // Add ceiling installation surcharge if applicable
-      if (product?.category === "anodos" && isCeilingInstallation) {
+      // Add $3 for ceiling installation (universal rule for all products)
+      if (isCeilingInstallation) {
         finalPriceUZS = finalPriceUZS + (3 * 12500); // Convert $3 to UZS using fallback rate
       }
       
@@ -677,7 +686,12 @@ export function ProductConfigurator({ productId }: ProductConfiguratorProps) {
                   productId={productId}
                   customOrderData={customOrderData}
                   onDataChange={setCustomOrderData}
-                  onClose={() => setShowCustomOrder(false)}
+                  onClose={() => {
+                    setShowCustomOrder(false);
+                    // Reset custom order state when closing
+                    setHasCustomOrder(false);
+                    setCustomOrderPrice(0);
+                  }}
                   isCeilingInstallation={isCeilingInstallation}
                   onInstallationTypeChange={setIsCeilingInstallation}
                   onPriceCalculated={(price, hasOrder) => {
